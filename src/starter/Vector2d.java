@@ -69,7 +69,7 @@ public class Vector2d {
 	}
 	//Other Angle between Vector and negative X axis
 	public double angleOtherX() {
-		return Math.abs(Math.PI/2.0 - this.angleX()); 
+		return Math.PI - this.angleX(); 
 	}
 	//Angle between Vector and positive Y axis
 	public double angleY() {
@@ -77,7 +77,7 @@ public class Vector2d {
 	}
 	//Other Angle between Vector and negative Y axis
 	public double angleOtherY() {
-		return Math.abs(Math.PI/2.0 - this.angleY()); 
+		return Math.PI - this.angleY(); 
 	}
 	//Turn Vector into a Unit vector
 	public Vector2d unitize()	{

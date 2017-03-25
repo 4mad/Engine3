@@ -28,8 +28,6 @@ public class RenderGeom {
 		GL11.glTranslated(-Origin.getX(), -Origin.getY(), 0);
 	}
 	
-	
-	
 	//circle with center points coordinates and radius given as doubles  
 	//??make variable "side" resolution
 	public void circle(double CenterX, double CenterY, double Radius) {
@@ -277,22 +275,6 @@ public class RenderGeom {
 		GL11.glRotated(angle, 0, 0, 1);
 		GL11.glTranslated(-origin.getX(), -origin.getY(), 0);
 		
-	}
-
-	public double getAngle() {
-		return Angle;
-	}
-
-	public void setAngle(double angle) {
-		Angle = angle;
-	}
-
-	public Vector2d getOrigin() {
-		return Origin;
-	}
-
-	public void setOrigin(Vector2d origin) {
-		Origin = origin;
 	}
 	
 	/* To include RegPolygonGenerator objects later

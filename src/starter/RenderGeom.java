@@ -9,25 +9,6 @@ import org.lwjgl.opengl.GL11;
 
 public class RenderGeom {
 
-	double Angle;
-	Vector2d Origin;
-	
-	public RenderGeom(){
-		Angle = 0;
-		Origin = new Vector2d(0,0);
-		GL11.glTranslated(Origin.getX(), Origin.getY(), 0);
-		GL11.glRotated(Angle, 0, 0, 1);
-		GL11.glTranslated(-Origin.getX(), -Origin.getY(), 0);
-	}
-	
-	public RenderGeom(double angle, Vector2d origin){
-		Angle = angle;
-		Origin = origin;
-		GL11.glTranslated(Origin.getX(), Origin.getY(), 0);
-		GL11.glRotated(Angle, 0, 0, 1);
-		GL11.glTranslated(-Origin.getX(), -Origin.getY(), 0);
-	}
-	
 	//circle with center points coordinates and radius given as doubles  
 	//??make variable "side" resolution
 	public void circle(double CenterX, double CenterY, double Radius) {
@@ -270,7 +251,7 @@ public class RenderGeom {
 		GL11.glPopMatrix();
 	}
 	//!!Rotates whole screen at the moment
-	public void rotate( Vector2d origin, double angle){
+	public void rotate(RenderGeom geo, Vector2d origin, double angle){
 		GL11.glTranslated(origin.getX(), origin.getY(), 0);
 		GL11.glRotated(angle, 0, 0, 1);
 		GL11.glTranslated(-origin.getX(), -origin.getY(), 0);

@@ -23,6 +23,9 @@ public class RenderTester {
 	static final int worldDimX = 1336;
 	static final int worldDimY = 768;	
 	
+	//renderGeom object
+	public RenderGeom A = new RenderGeom();
+	
 	//Geometry
 	public Vector2d centerC = new Vector2d(400,300);
 	double radius = 100;
@@ -116,8 +119,6 @@ public class RenderTester {
 		
 		initGL();//Rendering screen creation
 		vertexGen();//populates polygon vertex data
-		//renderGeom object
-		RenderGeom A = new RenderGeom();
 		
 		// Set the clear color
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f); //Black

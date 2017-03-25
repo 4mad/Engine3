@@ -2,8 +2,9 @@
 package starter;
 
 import org.lwjgl.opengl.GL11;
-//This object just renders geometry with no fill, no colors, or fancy effects.
+//This object just renders geometry no colors, or fancy effects, rectangles/polygons are filled though.
 //Currently Circle, line, point, rectangle, and Polygons are supported.
+//??Add a rotation in relation to arbitrary point method?
 //??To support RegPolygon Generator object
 
 public class RenderGeom {
@@ -51,10 +52,46 @@ public class RenderGeom {
 		GL11.glPopMatrix();
 	}
 	
+	//Rectangle made by vectors, origin is the bottom left point rotated around origin
+	public void rectangleCorner(Vector2d origin, Vector2d size, double angle ) {
+		GL11.glPushMatrix();
+		
+		GL11.glTranslated(origin.getX(), origin.getY(), 0);
+		GL11.glRotated(angle, 0, 0, 1);
+		GL11.glTranslated(-origin.getX(), -origin.getY(), 0);
+		//drawing the rectangle
+		GL11.glBegin(GL11.GL_QUADS);	
+		GL11.glVertex2d(origin.getX() , origin.getY());
+		GL11.glVertex2d(origin.getX() + size.getX(), origin.getY());
+		GL11.glVertex2d(origin.getX() + size.getX(), origin.getY() + size.getY());
+		GL11.glVertex2d(origin.getX(), origin.getY() + size.getY());
+		//end
+		GL11.glEnd();
+		GL11.glPopMatrix();
+	}
+	
 	//rectangle made by center point and size vectors.
 	public void rectangleCenter(Vector2d center, Vector2d size ) {
 		GL11.glPushMatrix();
 
+		//drawing the rectangle
+		GL11.glBegin(GL11.GL_QUADS);	
+		GL11.glVertex2d(center.getX() - size.getX()/2, center.getY() - size.getY()/2);
+		GL11.glVertex2d(center.getX() + size.getX()/2, center.getY() - size.getY()/2);
+		GL11.glVertex2d(center.getX() + size.getX()/2, center.getY() + size.getY()/2);
+		GL11.glVertex2d(center.getX() - size.getX()/2, center.getY() + size.getY()/2);
+		//end
+		GL11.glEnd();
+		GL11.glPopMatrix();
+	}
+	
+	//rectangle made by center point and size vectors rotated around center.
+	public void rectangleCenter(Vector2d center, Vector2d size, double angle ) {
+		GL11.glPushMatrix();
+		
+		GL11.glTranslated(center.getX(), center.getY(), 0);
+		GL11.glRotated(angle, 0, 0, 1);
+		GL11.glTranslated(-center.getX(), -center.getY(), 0);
 		//drawing the rectangle
 		GL11.glBegin(GL11.GL_QUADS);	
 		GL11.glVertex2d(center.getX() - size.getX()/2, center.getY() - size.getY()/2);
@@ -81,20 +118,59 @@ public class RenderGeom {
 	}
 	
 	//Polygon made by a list of Vertexes and an offset (polygon in relation to point)
-	//??Not sure how well this will work, test it out
 	//??What guarantees points are in order
-	public void polygon(Vector2d[] vertexes, Vector2d Offset){
+	public void polygon(Vector2d[] vertexes, Vector2d offset){
 		GL11.glPushMatrix();
-
+		
+		GL11.glTranslated(offset.getX(), offset.getY(), 0);
 		//Drawing the Polygon
 		GL11.glBegin(GL11.GL_POLYGON);
 		for (int i = 0; i < vertexes.length; i++)
-			GL11.glVertex2d(vertexes[i].getX()+Offset.getX(), vertexes[i].getY()+Offset.getY());
+			GL11.glVertex2d(vertexes[i].getX(), vertexes[i].getY());
 		//end
 		GL11.glEnd();
 		GL11.glPopMatrix();
 	}
 
+	//Polygon made by first point of a list of final Vertexes rotated by this angle (degrees)
+	//??What guarantees points are in order
+	public void polygon(Vector2d[] vertexes, double angle){
+		GL11.glPushMatrix();
+		
+		//openGL commands are stacked that's why last command first
+		GL11.glTranslated(vertexes[0].getX(), vertexes[0].getY(), 0);
+		//OpenGl applies following rotation to entire matrix of points
+		GL11.glRotated(angle, 0, 0, 1);
+		GL11.glTranslated(-vertexes[0].getX(), -vertexes[0].getY(), 0);
+		//Drawing the Polygon
+		GL11.glBegin(GL11.GL_POLYGON);
+		for (int i = 0; i < vertexes.length; i++)
+			GL11.glVertex2d(vertexes[i].getX(), vertexes[i].getY());
+		//end
+		GL11.glEnd();
+			
+		GL11.glPopMatrix();
+	}
+	
+	//Polygon made by first point of a list of relative Vertexes rotated by this angle (degrees) around first point
+	//??What guarantees points are in order
+	public void polygon(Vector2d[] vertexes, Vector2d offset, double angle){
+		GL11.glPushMatrix();
+		
+		//openGL commands are stacked that's why last command first
+		GL11.glTranslated(offset.getX(), offset.getY(), 0);
+		//OpenGl applies following rotation to entire matrix of points
+		GL11.glRotated(angle, 0, 0, 1);
+		//Drawing the Polygon
+		GL11.glBegin(GL11.GL_POLYGON);
+		for (int i = 0; i < vertexes.length; i++)
+			GL11.glVertex2d(vertexes[i].getX(), vertexes[i].getY());
+		//end
+		GL11.glEnd();
+		
+		GL11.glPopMatrix();
+	}
+	
 	//Line made by 2 vertexes
 	public void line(Vector2d origin, Vector2d end){
 		GL11.glPushMatrix();
@@ -138,13 +214,14 @@ public class RenderGeom {
 	
 	//Points made by list of Vertexes and offset by an offset Vector
 	//??does it matter in what order the points are rendered?
-	public void pointsOffset(Vector2d[] vertexes, Vector2d offset, int max){
+	public void points(Vector2d[] vertexes, Vector2d offset, int max){
 		GL11.glPushMatrix();
 
+		GL11.glTranslated(offset.getX(), offset.getY(), 0);
 		//Drawing the Points with an offset
 		GL11.glBegin(GL11.GL_POINTS);
 		for (int i = 0; i < max; i++)
-			GL11.glVertex2d(vertexes[i].getX() + offset.getX(), vertexes[i].getY() + offset.getY());
+			GL11.glVertex2d(vertexes[i].getX(), vertexes[i].getY());
 		//end
 		GL11.glEnd();
 		GL11.glPopMatrix();
@@ -152,10 +229,10 @@ public class RenderGeom {
 	
 	//Point made by a Vector
 	public void point(Vector2d vertex){
-			GL11.glPushMatrix();
+		GL11.glPushMatrix();
 
-		//Drawing the Points with an offset
-		GL11.glBegin(GL11.GL_POINT);
+		//Drawing the Point
+		GL11.glBegin(GL11.GL_POINTS);
 		GL11.glVertex2d(vertex.getX(), vertex.getY());
 		//end
 		GL11.glEnd();
@@ -165,30 +242,22 @@ public class RenderGeom {
 	//Point made by two doubles
 	public void point(double x, double y){
 		GL11.glPushMatrix();
-
-		//Drawing the Points with an offset
-		GL11.glBegin(GL11.GL_POINT);
+		
+		//Drawing the Point
+		GL11.glBegin(GL11.GL_POINTS);
 		GL11.glVertex2d(x, y);
 		//end
 		GL11.glEnd();
 		GL11.glPopMatrix();
 	}
-	
-	
-	//Polygon made by a list of Vertexes rotated by this angle
-	public void polygon(Vector2d[] vertexes, double angle){//Test this out
-		GL11.glPushMatrix();
-		
-		//OpenGl applies following rotation to entire matrix of points
+	//!!Rotates whole screen at the moment
+	public void rotate(RenderGeom geo, Vector2d origin, double angle){
+		GL11.glTranslated(origin.getX(), origin.getY(), 0);
 		GL11.glRotated(angle, 0, 0, 1);
-		//Drawing the Polygon
-		GL11.glBegin(GL11.GL_POLYGON);
-		for (int i = 0; i < vertexes.length; i++)
-			GL11.glVertex2d(vertexes[i].getX(), vertexes[i].getY());
-		//end
-		GL11.glEnd();
-		GL11.glPopMatrix();
+		GL11.glTranslated(-origin.getX(), -origin.getY(), 0);
+		
 	}
+	
 	/* To include RegPolygonGenerator objects later
 	//Polygon made by a list of Vertexes and a Center then rotated
 	public void polygon(RegPolyGen r){

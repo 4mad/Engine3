@@ -167,12 +167,7 @@ public class RenderTester {
 			A.points(points);
 			glColor3d(0,0.6,1);//some form of blue
 			glPointSize(8);
-			A.points(points, offsetP, points.length);
-			glColor3d(0.5,0,0);//maroon 0.5
-			glPointSize(10);
-			//A.rotate(A.points(points, offsetP, points.length), sizeR, angle);
-			//A.points(points, offsetP, points.length);
-			
+			A.points(points, offsetP, points.length);			
 			
 			angle += 0.5;
 			

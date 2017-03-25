@@ -250,13 +250,6 @@ public class RenderGeom {
 		GL11.glEnd();
 		GL11.glPopMatrix();
 	}
-	//!!Rotates whole screen at the moment
-	public void rotate(RenderGeom geo, Vector2d origin, double angle){
-		GL11.glTranslated(origin.getX(), origin.getY(), 0);
-		GL11.glRotated(angle, 0, 0, 1);
-		GL11.glTranslated(-origin.getX(), -origin.getY(), 0);
-		
-	}
 	
 	/* To include RegPolygonGenerator objects later
 	//Polygon made by a list of Vertexes and a Center then rotated

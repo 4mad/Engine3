@@ -26,6 +26,7 @@ public class RenderTester {
 	//renderGeom object
 	public RenderGeom A = new RenderGeom();
 	
+	
 	//Geometry
 	public Vector2d centerC = new Vector2d(400,300);
 	double radius = 100;
@@ -41,6 +42,10 @@ public class RenderTester {
 	public Vector2d point = new Vector2d(5,5);
 	public Vector2d[] points = new Vector2d[7];
 	public Vector2d offsetP = new Vector2d(800,300);
+	
+	//polygon object
+	public RegPolygonGen square = new RegPolygonGen(4, 50, 0, new Vector2d(400,400));
+	public Vector2d squareDir = new Vector2d(0.5, 0.5);
 	
 	
 	// The window handle
@@ -110,7 +115,7 @@ public class RenderTester {
 	}
 
 	private void loop() {
-		// This line is critical for LWJGL's interoperation with GLFW's
+		// This line is critical for LWJGL's interpolation with GLFW's
 		// OpenGL context, or any context that is managed externally.
 		// LWJGL detects the context that is current in the current thread,
 		// creates the GLCapabilities instance and makes the OpenGL
@@ -123,9 +128,12 @@ public class RenderTester {
 		// Set the clear color
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f); //Black
 		
+		//for (int i = 0; i < square.getVertexes().length; i++ ) System.out.println(square.getVertexes()[i]);
+		
 		// Run the rendering loop until the user has attempted to close
 		// the window or has pressed the ESCAPE key.
 		while ( !glfwWindowShouldClose(window) ) {
+				
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 			//circles
 			glColor3d(0.8,0.5,0.2);//gold
@@ -168,7 +176,13 @@ public class RenderTester {
 			A.points(points);
 			glColor3d(0,0.6,1);//some form of blue
 			glPointSize(8);
-			A.points(points, offsetP, points.length);			
+			A.points(points, offsetP, points.length);	
+			square.setAngleRads(Math.PI*angle/180);
+			squareDir.setX(angle/100);
+			square.setDirection(squareDir);
+			square.move();
+			square.setVertexes(square.generateVerts());//remember to set vertexes to generated ones
+			A.polygon(square.getVertexes(), square.getCenter());
 			
 			angle += 0.5;
 			
@@ -177,6 +191,7 @@ public class RenderTester {
 			// Poll for window events. The key callback above will only be
 			// invoked during this call.
 			glfwPollEvents();
+			
 		}
 		
 	}

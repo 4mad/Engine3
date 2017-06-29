@@ -1,6 +1,6 @@
 //David Govorko, 3/24/2017
 package starter;
-//copy paste lwjgl set up from https://www.lwjgl.org/guide
+//Copy paste lwjgl set up from https://www.lwjgl.org/guide
 //More documentation on GLFW http://www.glfw.org/docs/latest/window_guide.html
 //LWJGL 3 switched to GLFW and now all previous lwjgl 2 (non public) versions are trash
 
@@ -20,33 +20,22 @@ import static org.lwjgl.system.MemoryUtil.*;
 //Simple way to test renderings of geometries
 public class RenderTester {
 	//Window & Buffer dimensions
-	static final int worldDimX = 1336;
-	static final int worldDimY = 768;	
+	static final int worldDimX = 1300;
+	static final int worldDimY = 700;
 	
-	//renderGeom object
-	public RenderGeom A = new RenderGeom();
+	//NGeom Initialize
+	public NGeom linear = new NGeom();//Line
+	public NGeom circular = new NGeom();//Circle
+	public NGeom polygonal = new NGeom();//Polygon
 	
+	//Geom Initialize
+	public Geom POINT = new Geom();//Point NGeom is incorporated by default
+	public Geom LINE = new Geom();
+	public Geom CIRCLE = new Geom();
+	public Geom POLYGON = new Geom();
 	
-	//Geometry
-	public Vector2d centerC = new Vector2d(400,300);
-	double radius = 100;
-	public Vector2d cornerR = new Vector2d(800,600);
-	public Vector2d sizeR = new Vector2d(100,50);
-	public Vector2d[] vertexesP = new Vector2d[5];
-	public Vector2d[] vertexesPO = new Vector2d[5];
-	public Vector2d offsetPO = new Vector2d(900,100);
-	public Vector2d offsetPA = new Vector2d(1100,100);
-	public double angle = 0;
-	public Vector2d lineS = new Vector2d(500,100);
-	public Vector2d lineE = new Vector2d(1,99);
-	public Vector2d point = new Vector2d(5,5);
-	public Vector2d[] points = new Vector2d[7];
-	public Vector2d offsetP = new Vector2d(800,300);
-	
-	//polygon object
-	public RegPolygonGen square = new RegPolygonGen(4, 50, 0, new Vector2d(400,400));
-	public Vector2d squareDir = new Vector2d(0.5, 0.5);
-	
+	//Regular polygon generator
+	public RegPolygonGen octagon = new RegPolygonGen(8, 75, 0, new Vector2d(0,0));	
 	
 	// The window handle
 	private long window;
@@ -112,6 +101,7 @@ public class RenderTester {
 
 		// Make the window visible
 		glfwShowWindow(window);
+		
 	}
 
 	private void loop() {
@@ -123,115 +113,95 @@ public class RenderTester {
 		GL.createCapabilities();
 		
 		initGL();//Rendering screen creation
-		vertexGen();//populates polygon vertex data
+		geomInit();//populates the Geoms and NGeoms
 		
 		// Set the clear color
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f); //Black
-		
-		//for (int i = 0; i < square.getVertexes().length; i++ ) System.out.println(square.getVertexes()[i]);
-		
+				
 		// Run the rendering loop until the user has attempted to close
 		// the window or has pressed the ESCAPE key.
 		while ( !glfwWindowShouldClose(window) ) {
 				
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
-			//circles
-			glColor3d(0.8,0.5,0.2);//gold
-			A.circle(centerC, radius);
+			glPointSize(1);//regular point size
 			glColor3d(1,1,1);//white
-			A.circle(centerC.getX(), centerC.getY(), radius/2);
-			//rectangles
+			POINT.renderGeom();
+			glColor3d(0.8,0.5,0.2);//gold
+			LINE.renderGeom();
 			glColor3d(0,0,1);//blue
-			A.rectangleCorner(cornerR.add(sizeR), sizeR);
+			CIRCLE.renderGeom();
 			glColor3d(1,0,0);//red
-			A.rectangleCenter(cornerR, sizeR.scalarMulti(0.5));
-			glColor3d(1,0.6,0.4);//salmon
-			A.rectangleCenter(cornerR, sizeR.scalarMulti(0.5), angle);
-			glColor3d(0.9,0.5,0.9);//ugly pale purple
-			A.rectangleCorner(cornerR.subtract(sizeR), sizeR, angle);
-			//polygons
-			glColor3d(0,1,0);//green
-			A.polygon(vertexesP);
-			glColor3d(0.9,0.5,0.9);//fuchsia
-			A.polygon(vertexesPO, offsetPO);
-			glColor3d(0,1,1);//aqua
-			A.polygon(vertexesPO, offsetPA, angle);
-			glColor3d(0.4,0.4,0.6);//steel
-			A.polygon(vertexesP, angle);
-			//lines
-			glColor3d(1,0.4,0.7);//hot pink
-			A.line(10, 100, 900, 500);
-			glColor3d(1,1,0);//Yellow
-			A.line(lineS, lineE);
-			//point
-			glColor3d(0,0.3,0);//Dark green
-			glPointSize(10);
-			A.point(50,50);
-			glColor3d(0.5,0.9,0);//lime green
-			glPointSize(4);
-			A.point(point);
-			//points
-			glColor3d(1,0.6,0);//orange
-			glPointSize(6);
-			A.points(points);
-			glColor3d(0,0.6,1);//some form of blue
-			glPointSize(8);
-			A.points(points, offsetP, points.length);	
-			square.setAngleRads(Math.PI*angle/180);
-			squareDir.setX(angle/100);
-			square.setDirection(squareDir);
-			square.move();
-			square.setVertexes(square.generateVerts());//remember to set vertexes to generated ones
-			A.polygon(square.getVertexes(), square.getCenter());
-			
-			angle += 0.5;
+			POLYGON.renderGeom();
+			/*Colors listed below for reference			 
+				glColor3d(1,0.6,0.4);//salmon
+				glColor3d(0.9,0.5,0.9);//ugly pale purple
+				glColor3d(0,1,0);//green
+				glColor3d(0.9,0.5,0.9);//fuchsia
+				glColor3d(0,1,1);//aqua
+				glColor3d(0.4,0.4,0.6);//steel
+				glColor3d(1,0.4,0.7);//hot pink
+				glColor3d(1,1,0);//Yellow
+				glColor3d(0,0.3,0);//Dark green
+				glColor3d(0.5,0.9,0);//lime green
+				glColor3d(1,0.6,0);//orange
+				glColor3d(0,0.6,1);//some form of blue
+			*/
+			geomMove();//moves the Geoms
 			
 			glfwSwapBuffers(window); // swap the color buffers
 
 			// Poll for window events. The key callback above will only be
 			// invoked during this call.
 			glfwPollEvents();
-			
-		}
+		} //While loop
 		
 	}
 	
-	private void initGL() {
-		//generic clears screen and initiates the screen
+	private void initGL() { //generic clears screen and initiates the screen
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glLoadIdentity();
 		GL11.glOrtho(0, worldDimX, 0, worldDimY, 1, -1);
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 	}
 	
-	public void vertexGen(){
-		//populates each polygon render type
-		//this polygon is in full coordinates
-		vertexesP[0] = new Vector2d(700,100);
-		vertexesP[1] = new Vector2d(700,150);
-		vertexesP[2] = new Vector2d(750,150);
-		vertexesP[3] = new Vector2d(750,100);
-		vertexesP[4] = new Vector2d(725,50);
-		//this polygon is in relative coordinates
-		vertexesPO[0] = new Vector2d(0,0);
-		vertexesPO[1] = new Vector2d(0,50);
-		vertexesPO[2] = new Vector2d(50,50);
-		vertexesPO[3] = new Vector2d(50,0);
-		vertexesPO[4] = new Vector2d(25,-75);
-		//points vector
-		points[0] = new Vector2d(50,70);
-		points[1] = new Vector2d(40,75);
-		points[2] = new Vector2d(18,12);
-		points[3] = new Vector2d(80,50);
-		points[4] = new Vector2d(32,5);
-		points[5] = new Vector2d(77,90);
-		points[6] = new Vector2d(16,68);
+	public void geomInit(){
+		POINT.setOffset(new Vector2d(60,600));
+		POINT.setVelocity(new Vector2d(0.5,-1.2));
 		
+		linear.setLDA(300);
+		linear.setVert(new Vector2d[] {new Vector2d(90,10)});
+		
+		LINE.setGeometry(linear);
+		LINE.setOffset(new Vector2d(100,200));
+		LINE.setAngle(900);
+		LINE.setDeltaAngle(-1);
+		
+		circular.setLDA(250);
+		
+		CIRCLE.setGeometry(circular);
+		CIRCLE.setOffset(new Vector2d(1150,500));
+		
+		polygonal.setVert(octagon.getVertexes());
+		polygonal.setLDA(octagon.getLongDistAcross());
+		
+		POLYGON.setGeometry(polygonal);
+		POLYGON.setOffset(new Vector2d(100,450));
+		POLYGON.setAngle(0);
+		POLYGON.setDeltaAngle(5);
+		POLYGON.setVelocity(new Vector2d(1,-.01));
+	}
+	
+	//Handles changes in Geom's positions/angles
+	public void geomMove(){
+		POINT.setOffset(POINT.getOffset().add(POINT.getVelocity()));
+		LINE.setAngle(LINE.getAngle() + LINE.getDeltaAngle());//Remember to reset back to zero every 360 or else int overflow
+		circular.setLDA(POINT.getOffset().getX());
+		POLYGON.setAngle(POLYGON.getAngle() + POLYGON.getDeltaAngle());
+		POLYGON.setOffset(POLYGON.getOffset().add(POLYGON.getVelocity()));		
 	}
 	
 	public static void main(String[] args) {
 		new RenderTester().run();
-
 	}
 
 }

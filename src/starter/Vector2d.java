@@ -4,7 +4,7 @@ package starter;
 
 public class Vector2d {
 
-	double x,y;
+	private double x,y;
 	
 	public Vector2d() {
 	  x=0;
@@ -33,39 +33,39 @@ public class Vector2d {
 	}
 	
 	public String toString() {
-		return "Vector2d: " + " <" + getX() + "," + getY() + ">";
+		return "<" + getX() + " , " + getY() + ">";
 	}
 	//Distance
 	public double dist(Vector2d a) {
-		return Math.sqrt(Math.pow(this.x-a.x,2)+Math.pow(this.y-a.y,2));	
+		return Math.sqrt(Math.pow(x-a.x,2)+Math.pow(y-a.y,2));	
 	}	
 	//Dot product
 	public double dot(Vector2d a)	{
-		return this.x*a.getX() + this.y*a.getY();
+		return x*a.getX() + y*a.getY();
 	}
 	//Vector Addition
 	public Vector2d add(Vector2d a)	{
-		double i = this.x + a.getX();
-		double j = this.y + a.getY();
+		double i = x + a.getX();
+		double j = y + a.getY();
 		return new Vector2d(i, j); 
 	}
 	//Vector subtraction
 	public Vector2d subtract(Vector2d a) {
-		double i = this.x - a.getX();
-		double j = this.y - a.getY();
+		double i = x - a.getX();
+		double j = y - a.getY();
 		return new Vector2d(i, j);	 
 	}
 	//Vector magnitude
 	public double magnitude() {
-		return Math.sqrt(Math.pow(this.x,2) + Math.pow(this.y,2));
+		return Math.sqrt(Math.pow(x,2) + Math.pow(y,2));
 	}
 	//Vector cross product	
 	public double cross(Vector2d a) {
-			return this.x*a.getY() - a.getX()*this.y;			
+			return x*a.getY() - a.getX()*y;			
 	}
 	//Angle between Vector and positive X axis
 	public double angleX() {
-		return  Math.acos(this.x/this.magnitude());
+		return  Math.acos(x/this.magnitude());
 	}
 	//Other Angle between Vector and negative X axis
 	public double angleOtherX() {
@@ -73,20 +73,20 @@ public class Vector2d {
 	}
 	//Angle between Vector and positive Y axis
 	public double angleY() {
-		return  Math.acos(this.y/this.magnitude());
+		return  Math.acos(y/this.magnitude());
 	}
 	//Other Angle between Vector and negative Y axis
 	public double angleOtherY() {
-		return Math.PI - this.angleY(); 
+		return Math.PI - angleY(); 
 	}
 	//Turn Vector into a Unit vector
 	public Vector2d unitize()	{
-		if (this.x == 0 & this.y == 0) return this;
-		return new Vector2d(this.x/this.magnitude(), this.y/this.magnitude());			
+		if (x == 0 & y == 0) return this;
+		return new Vector2d(x/this.magnitude(), y/this.magnitude());			
 	}
 	//Scalar multiplication of Vector
 	public Vector2d scalarMulti(double a) {
-		return new Vector2d(a*this.x, a*this.y);
+		return new Vector2d(a*x, a*y);
 	}
 	//Angle between two vectors
 	public double angleBetween(Vector2d a){
@@ -94,7 +94,7 @@ public class Vector2d {
 	}
 	//Create tangent vector object
 	public Vector2d tangent(){
-		return new Vector2d(-this.y, this.x);
+		return new Vector2d(-y, x);
 	}
 	//Deep Copy = Make new vector object
 	public Vector2d deepCopy() {
@@ -102,16 +102,16 @@ public class Vector2d {
 	}
 	//Keep as doubles but remove decimals and floor
 	public Vector2d integizerFloor() {
-		return new Vector2d(Math.floor(this.x), Math.floor(this.y));
+		return new Vector2d(Math.floor(x), Math.floor(y));
 	}
 	//Keep as doubles but remove decimals and ceil
 	public Vector2d integizerCeil() {
-		return new Vector2d(Math.ceil(this.x), Math.ceil(this.y));
+		return new Vector2d(Math.ceil(x), Math.ceil(y));
 	}
 	//Returns new rotated vector object
 	public Vector2d rotate(double angle) {
-		double xPrime = this.x*Math.cos(angle) - this.y*Math.sin(angle);
-		double yPrime = this.x*Math.sin(angle) + this.y*Math.cos(angle);
+		double xPrime = x*Math.cos(angle) - y*Math.sin(angle);
+		double yPrime = x*Math.sin(angle) + y*Math.cos(angle);
 		return new Vector2d(xPrime, yPrime);
 	}
 	

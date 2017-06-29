@@ -76,8 +76,8 @@ public class Geom {
 	}
 
 	public String toString() {
-		return "Geom [Angle=" + Angle + ", DeltaAngle=" + DeltaAngle + ", Offset=" + Offset + ", Velocity=" + Velocity
-				+ ", Geometry=" + Geometry + "]";
+		return "Geom [Angle = " + Angle + ", DeltaAngle = " + DeltaAngle + ", Offset = " + Offset + ", Velocity = " + Velocity
+				+ ", Geometry = " + Geometry + "]";
 	}
 	
 	//Renders the geometry by guessing the geometry type first from values of NGeom's fields.

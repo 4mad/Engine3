@@ -42,7 +42,7 @@ public class NGeom {
 	}
 
 	public String toString() {
-		return "NGeom [LDA=" + LDA + ", Vertexes=" + Arrays.toString(Vertexes) + "]";
+		return "NGeom [LDA = " + LDA + ", Vertexes = " + Arrays.toString(Vertexes) + "]";
 	}
 	
 }

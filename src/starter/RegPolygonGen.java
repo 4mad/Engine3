@@ -13,24 +13,16 @@ public class RegPolygonGen {
 		private double shortDistAcross;
 		private  Vector2d[] vertexes;
 		
-		//A RegPolygonGen is constructed by giving the number of sides, side length, angle of rotation around center, a center point, and a direction vector
+		//A RegPolygonGen is constructed by giving the number of sides and side length.
 		public RegPolygonGen() {
-			numberSides = 3;
+			numberSides = 4;
 			lengthSide = 10;	
 			vertexes = this.generateVerts();
 			longDistAcross = this.longestDist();
 			shortDistAcross = this.shortestDist();
 		}
-
-		public RegPolygonGen(int numofSides, double lengthofSide, double angleSizeRad, Vector2d centerPoint) {
-			numberSides = numofSides;
-			lengthSide = lengthofSide;		
-			vertexes = this.generateVerts();
-			longDistAcross = this.longestDist();
-			shortDistAcross = this.shortestDist();
-		}
 		
-		public RegPolygonGen(int numofSides, double lengthofSide, double angleSizeRad, Vector2d centerPoint, Vector2d directionVector) {
+		public RegPolygonGen(int numofSides, double lengthofSide) {
 			numberSides = numofSides;
 			lengthSide = lengthofSide;		
 			vertexes = this.generateVerts();
@@ -71,18 +63,18 @@ public class RegPolygonGen {
 		}	
 		
 		public String toString() {
-			return "RegPolygonGen [numberSides=" + numberSides + ", lengthSide=" + lengthSide + ", longDistAcross="
-					+ longDistAcross + ", shortDistAcross=" + shortDistAcross + ", vertexes="
+			return "RegPolygonGen [numberSides = " + numberSides + ", lengthSide = " + lengthSide + ", longDistAcross = "
+					+ longDistAcross + ", shortDistAcross = " + shortDistAcross + ", vertexes = "
 					+ Arrays.toString(vertexes) + "]";
 		}
 		
 		private Vector2d[] generateVerts(){ //Does not update polygon object's vertexes, polygon.setVertexes(vert2d[]) required
-			Vector2d[] verts = new Vector2d[this.getNumberSides()];//make it so that it starts in "regular" position
-			double interiorlength = this.getLengthSide()/Math.sqrt(2-2*Math.cos(2*Math.PI/this.getNumberSides()));
-			for(int i = 1; i <= this.getNumberSides() ; i++){
+			Vector2d[] verts = new Vector2d[numberSides];//make it so that it starts in "regular" position
+			double interiorlength = lengthSide/Math.sqrt(2-2*Math.cos(2*Math.PI/numberSides));
+			for(int i = 1; i <= this.numberSides ; i++){
 				//This splits a circle into all the angles needed to make the vertexes, and rotates the object to the generic "start" position
-				verts[i-1] = new Vector2d(interiorlength*Math.cos((2*Math.PI)/this.getNumberSides()*i - Math.PI*(this.getNumberSides() - 2)/(2*this.getNumberSides())), 
-						interiorlength*Math.sin((2*Math.PI)/this.getNumberSides()*i - Math.PI*(this.getNumberSides() - 2)/(2*this.getNumberSides())));
+				verts[i-1] = new Vector2d(interiorlength*Math.cos((2*Math.PI)/numberSides*i - Math.PI*(numberSides - 2)/(2*numberSides)), 
+						interiorlength*Math.sin((2*Math.PI)/numberSides*i - Math.PI*(numberSides - 2)/(2*numberSides)));
 			}
 			return verts;
 		}
@@ -90,10 +82,10 @@ public class RegPolygonGen {
 		private double longestDist(){//can be faster?
 			double longest = -1;
 
-			for (int i = 0; i < this.getVertexes().length; i++)
-				for (int k = this.getVertexes().length - 1; k > i; k--)
-					if (this.getVertexes()[i].dist(this.getVertexes()[k]) > longest)
-						longest = this.getVertexes()[i].dist(this.getVertexes()[k]);
+			for (int i = 0; i < vertexes.length; i++)
+				for (int k = vertexes.length - 1; k > i; k--)
+					if (vertexes[i].dist(vertexes[k]) > longest)
+						longest = vertexes[i].dist(vertexes[k]);
 
 			return longest;
 		}
@@ -101,10 +93,10 @@ public class RegPolygonGen {
 		private double shortestDist(){//can be faster?
 			double shortest = Double.MAX_VALUE;
 
-			for (int i = 0; i < this.getVertexes().length; i++)
-				for (int k = this.getVertexes().length - 1; k > i; k--)
-					if (this.getVertexes()[i].dist(this.getVertexes()[k]) < shortest)
-						shortest = this.getVertexes()[i].dist(this.getVertexes()[k]);
+			for (int i = 0; i < vertexes.length; i++)
+				for (int k = vertexes.length - 1; k > i; k--)
+					if (this.vertexes[i].dist(vertexes[k]) < shortest)
+						shortest = vertexes[i].dist(vertexes[k]);
 
 			return shortest;
 		}

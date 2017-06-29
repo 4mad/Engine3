@@ -1,8 +1,9 @@
+//DEPRECIATED!!!! Now incorporated into Geom.
 //David Govorko, 3/16/2017
 package starter;
 
 import org.lwjgl.opengl.GL11;
-//This object just renders geometry no colors, or fancy effects, rectangles/polygons are filled though.
+//This object just renders geometry no fancy effects, rectangles/polygons are filled though.
 //Currently Circle, line, point, rectangle, and Polygons are supported.
 //??Add a rotation in relation to arbitrary point method?
 //??To support RegPolygon Generator object
@@ -11,7 +12,7 @@ public class RenderGeom {
 
 	//circle with center points coordinates and radius given as doubles  
 	//??make variable "side" resolution
-	public void circle(double CenterX, double CenterY, double Radius) {
+	public void circle(double CenterX, double CenterY, double Radius) {	
 		GL11.glPushMatrix();
 		GL11.glBegin(GL11.GL_LINE_LOOP);
 		for(int i = 0; i<250; i++) {

@@ -141,23 +141,23 @@ public class RenderTester {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 			glPointSize(1);//regular point size
 			glColor3d(1,1,1);//white
-			POINT.blindRenderGeom();
+			POINT.renderPoint();
 			glColor3d(0.8,0.5,0.2);//gold
-			LINE.blindRenderGeom();
+			LINE.renderLine();
 			glColor3d(1,0.4,0.7);//hot pink
-			LINE2.blindRenderGeom();
+			LINE2.renderLine();
 			glColor3d(0,0,1);//blue
-			CIRCLE.blindRenderGeom();
+			CIRCLE.renderCircle();
 			glColor3d(1,0,0);//red
-			POLYGON.blindRenderGeom();
+			POLYGON.renderPolygon();
 			glColor3d(1,0.6,0.4);//salmon
-			TRIANGLE.blindRenderGeom();
+			TRIANGLE.renderPolygon();
 			glColor3d(0.9,0.5,0.9);//ugly pale purple
-			SQUARE.blindRenderGeom();
+			SQUARE.renderPolygon();
 			glColor3d(0,1,0);//green
-			CIRCLE2.blindRenderGeom();
+			CIRCLE2.renderCircle();
 			glColor3d(1,1,0);//Yellow
-			POLYGON2.blindRenderGeom();
+			POLYGON2.renderPolygon();
 			/*Colors listed below for reference	
 				glColor3d(1,1,1);//white
 				glColor3d(0.8,0.5,0.2);//gold
@@ -199,19 +199,19 @@ public class RenderTester {
 		POINT.setOffset(new Vector2d(60,600));
 		POINT.setVelocity(new Vector2d(0.5,-1.2));
 		
-		linear.setLDA(300);
 		linear.setVert(new Vector2d[] {new Vector2d(90,10)});
+		linear.setLDA(-1*(worldDimX + worldDimY)/linear.getVertexes()[0].magnitude());
 		
 		LINE.setGeometry(linear);
 		LINE.setOffset(new Vector2d(100,200));
 		LINE.setAngle(900);
 		LINE.setDeltaAngle(-1);
 		
-		linear2.setVert(new Vector2d[] { new Vector2d(-1*(worldDimX + worldDimY), worldDimY)});
-		linear2.setLDA(linear2.getVertexes()[0].magnitude());
+		linear2.setVert(new Vector2d[] { new Vector2d(-1, 1)});
+		linear2.setLDA(-1*(worldDimX + worldDimY)/linear2.getVertexes()[0].magnitude());
 		
 		LINE2.setGeometry(linear2);
-		LINE2.setOffset(new Vector2d(worldDimX,1));
+		LINE2.setOffset(new Vector2d(1000,1));
 		
 		circular.setLDA(250);
 		
@@ -278,36 +278,36 @@ public class RenderTester {
 		if (D < (AB + 150)){ 
 			glColor3d(1,0.6,0);//orange
 			glPointSize(5);
-			CIRCLE2.blindCollision(SQUARE).blindRenderGeom();
-			if (CIRCLE2.blindCollision(SQUARE).getOffset().dist(CIRCLE2.getOffset()) <= CIRCLE2.getGeometry().getLDA()/2) {//Detection when distance to vertex is shorter than radius
-				System.out.println(CIRCLE2.blindCollision(SQUARE));
-				SQUARE.setVelocity(SQUARE.getVelocity().scalarMulti(-1));
+			CIRCLE2.collisionSquareVsCircle(SQUARE).renderPoint();
+			if (CIRCLE2.collisionSquareVsCircle(SQUARE).getOffset().dist(CIRCLE2.getOffset()) <= CIRCLE2.getGeometry().getLDA()/2) {//Detection when distance to vertex is shorter than radius
+				System.out.println(CIRCLE2.collisionSquareVsCircle(SQUARE));
+				SQUARE.setVelocity(SQUARE.getVelocity().scalarMulti(-1)); // Basic visual response to collision
 				SQUARE.setOffset(SQUARE.getOffset().add(SQUARE.getVelocity()));
 			}
 		} 
 		if (L1 < SQUARE.getGeometry().getLDA()/2 + 150) {
 			glColor3d(1,0.6,0.1);//orange
 			glPointSize(3);
-			LINE2.blindCollision(SQUARE).blindRenderGeom();
+			LINE2.collisionRegPolyVsLine(SQUARE).blindRenderGeom();
 			
 			double centerDist = LINE2.minDistPointToLine(SQUARE.getOffset());
 			//System.out.println("Min distance to center: " + centerDist);
-			if (centerDist/LINE2.minDistPointToLine(LINE2.blindCollision(SQUARE).getOffset()) <= 0) {
-				System.out.println(LINE2.blindCollision(SQUARE)); //Detection when vertex is on the opposite side of the line that the center is on, allows for collision from both sides of line
-				SQUARE.setVelocity(SQUARE.getVelocity().scalarMulti(-1));
+			if (centerDist/LINE2.minDistPointToLine(LINE2.collisionRegPolyVsLine(SQUARE).getOffset()) <= 0) {//Detection when vertex is on the opposite side of the line that the center is on, allows for collision from both sides of line
+				System.out.println(LINE2.collisionRegPolyVsLine(SQUARE)); 
+				SQUARE.setVelocity(SQUARE.getVelocity().scalarMulti(-1)); // Basic visual response to collision
 				SQUARE.setOffset(SQUARE.getOffset().add(SQUARE.getVelocity()));
 			}
 		}
 		if (L2 < POLYGON2.getGeometry().getLDA()/2 + 150) {
 			glColor3d(1,0,0.1);//orange
 			glPointSize(5);
-			LINE2.blindCollision(POLYGON2).blindRenderGeom();
+			LINE2.collisionRegPolyVsLine(POLYGON2).blindRenderGeom();
 			
 			double centerDist = LINE2.minDistPointToLine(POLYGON2.getOffset());
 			//System.out.println("Min distance to center: " + centerDist);
-			if (centerDist/LINE2.minDistPointToLine(LINE2.blindCollision(POLYGON2).getOffset()) <= 0) {
-				System.out.println(LINE2.blindCollision(POLYGON2)); //Detection when vertex is on the opposite side of the line that the center is on, allows for collision from both sides of line
-				POLYGON2.setVelocity(POLYGON2.getVelocity().scalarMulti(-1));
+			if (centerDist/LINE2.minDistPointToLine(LINE2.collisionRegPolyVsLine(POLYGON2).getOffset()) <= 0) {
+				System.out.println(LINE2.collisionRegPolyVsLine(POLYGON2)); //Detection when vertex is on the opposite side of the line that the center is on, allows for collision from both sides of line
+				POLYGON2.setVelocity(POLYGON2.getVelocity().scalarMulti(-1)); // Basic visual response to collision
 				POLYGON2.setOffset(POLYGON2.getOffset().add(POLYGON2.getVelocity()));
 			}
 		}

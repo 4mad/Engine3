@@ -6,6 +6,7 @@ TODO Conglomerate: (Add all TODOs here by section)
 
 	COLLISION OVERALL:
 		1) Find way to better resolve collision of objects with rotation (Object gets stuck inside other object due to rotation post collision)
+		2) Fix line segment generated from polygon side collision detection occasionally rendering from vertex into space instead of overlapping actual polygon side.
 
 	LINE COLLISION:
 		1)<X> Test out line collision against different geometries. 
@@ -16,12 +17,14 @@ TODO Conglomerate: (Add all TODOs here by section)
 		1) Make a line segment collision detection, currently only LINE collision exists.
 		
 	LINE GEOM OBJECT DEFINITION:
-		1) Define a line object versus a Line segment in Geom ( renderGeom, collisionGeom).	
+		1) Define a line object versus a Line segment in Geom 
+			A) collisionGeom
+			B)<X> renderGeom
 	
 	INPUT:
 		1) Create a keyboard input detector.
 		2) Make it register up down left right movements.
 		
 	Geom:
-		1) Make non "blind" collision methods for each specific case.
-		2) Make non "blind" renderGeom methods for each specific case.
+		1) <X>Make non "blind" collision methods for each specific case.
+		2) <X>Make non "blind" renderGeom methods for each specific case.

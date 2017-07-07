@@ -13,7 +13,7 @@ import org.lwjgl.opengl.GL11;
  * METHODS:
  * 	RENDER: Renders the geometry
  */
-//TODO: COLLISION method && should color be a field && should velocity/deltaAngle be here???
+//TODO: should color be a field && should velocity/deltaAngle be here???
 public class Geom {
 	private double Angle;
 	private double DeltaAngle;
@@ -96,9 +96,9 @@ public class Geom {
 		if (Math.abs(Angle) == 360){ Angle = 0;} //to avoid int overflow
 	}
 	
-	public double minDistPointToLine(Vector2d point){ //returns the minimum distance from a Geom's center to a line;
+	public double minDistPointToLine(Vector2d point){ //returns the minimum distance from a line to a point;
 		double distance = 0;
-		if (this.getGeometry().getVertexes().length == 1){ 
+		if (this.getGeometry().getVertexes().length == 1){ // Checks to see if the geom is a line.
 			Vector2d pointAtOrigin  = point.subtract(this.getOffset());			
 			Vector2d lineOrigin = this.getGeometry().getVertexes()[0];
 			
@@ -117,124 +117,171 @@ public class Geom {
 	//Renders the geometry by guessing the geometry type first from values of NGeom's fields.
 	//TODO: Optimize order of if statements --> Lazy conditionals
 	public void blindRenderGeom(){
-		//POINT V = 0 & LDA = 0
-		if (Geometry.getVertexes().length == 0 && Geometry.getLDA() == 0) {
-			GL11.glPushMatrix();
+		
+		if (Geometry.getVertexes().length == 0 && Geometry.getLDA() == 0) {//POINT V = 0 & LDA = 0
+			this.renderPoint();
 			
-			//Rotation is not needed for a point
-			//Drawing the Point at the offset
-			GL11.glBegin(GL11.GL_POINTS);
-			GL11.glVertex2d(Offset.getX(), Offset.getY());//Offset accounted for here
-			//end
-			GL11.glEnd();
-			GL11.glPopMatrix();
-			
-		} //LINE SEGMENT V = 1 & LDA = segment length
+		}//LINE SEGMENT V = 1 & LDA = segment length
 		else if (Geometry.getVertexes().length == 1 && Geometry.getLDA() > 0){
-			GL11.glPushMatrix();
-			//GL11.glLineWidth(3);
-			//Offset
-			GL11.glTranslated(Offset.getX(), Offset.getY(), 0);
-			//Rotate
-			GL11.glRotated(Angle, 0, 0, 1);
-			//Drawing the Line Segment
-			GL11.glBegin(GL11.GL_LINES);
-			GL11.glVertex2d(0 , 0);
-			GL11.glVertex2d(Geometry.getVertexes()[0].getX() , Geometry.getVertexes()[0].getY());
-			//end
-			GL11.glEnd();
-			//GL11.glLineWidth(1);
-			GL11.glPopMatrix();	
+			this.renderLineSegment();
+				
+		}//LINE V = 1 & LDA = -1*(segment length)
+		else if (Geometry.getVertexes().length == 1 && Geometry.getLDA() < 0){
+			this.renderLine();
 			
 		} //CIRCLE V = 0 & LDA = Diameter
-		  //TODO: Maybe change the circle's edge resolution?
 		else if (Geometry.getVertexes().length == 0 && Geometry.getLDA() > 0){
-			GL11.glPushMatrix();
-			
-			//Circle rotating excluded for now
-			//Drawing the Circle
-			GL11.glBegin(GL11.GL_LINE_LOOP);
-			for(int i = 0; i<250; i++) { //250 = edge resolution
-				double angle = (i*2*Math.PI/250);
-				GL11.glVertex2d(Offset.getX() + (Math.cos(angle) * Geometry.getLDA()/2), 
-						Offset.getY() + (Math.sin(angle) * Geometry.getLDA()/2)); //Offset accounted for here
-			}
-			GL11.glEnd();
-			GL11.glPopMatrix();
+			this.renderCircle();
 			
 		} //REG. POLYGON V > 2 & LDA > 0
 		else if (Geometry.getVertexes().length > 2 && Geometry.getLDA() > 0){
-			GL11.glPushMatrix();
+			this.renderPolygon();
 			
-			//Offset
-			GL11.glTranslated(Offset.getX(), Offset.getY(), 0);
-			//Rotate
-			GL11.glRotated(Angle, 0, 0, 1);
-			//Drawing the Regular Polygon
-			GL11.glBegin(GL11.GL_POLYGON);
-			for (int i = 0; i < Geometry.getVertexes().length; i++)
-				GL11.glVertex2d(Geometry.getVertexes()[i].getX() , Geometry.getVertexes()[i].getY());
-			//end
-			GL11.glEnd();
-			GL11.glPopMatrix();
-		} //Catch for errors
-		  //TODO: Add the other geometry types
-		else {
+		} else { //Catch for errors
 			System.out.println("Geometry properties do not match any renderer yet, "
 					+ "here is an attempt to print it out: " + Geometry.toString());
 		}
+		
 	} // renderGeom()
+	
+	public void renderPoint(){ //Renders a point
+		GL11.glPushMatrix();
+		
+		//Rotation is not needed for a point
+		//Drawing the Point at the offset
+		GL11.glBegin(GL11.GL_POINTS);
+		//Offset
+		GL11.glVertex2d(Offset.getX(), Offset.getY());
+		//end
+		GL11.glEnd(); 
+		GL11.glPopMatrix();
+	}
+	
+	public void renderLineSegment(){ //Renders a Line Segment
+		GL11.glPushMatrix();
+		//GL11.glLineWidth(3); //Really only used for debugging.
+		//Offset
+		GL11.glTranslated(Offset.getX(), Offset.getY(), 0);
+		//Rotate
+		GL11.glRotated(Angle, 0, 0, 1);
+		//Drawing the Line Segment
+		GL11.glBegin(GL11.GL_LINES);
+		GL11.glVertex2d(0 , 0);
+		GL11.glVertex2d(Geometry.getVertexes()[0].getX() , Geometry.getVertexes()[0].getY());
+		//end
+		GL11.glEnd();
+		//GL11.glLineWidth(1);
+		GL11.glPopMatrix();	
+	}
+	
+	public void renderLine(){ //Renders a Line
+		GL11.glPushMatrix();
+		//GL11.glLineWidth(3); //Really only used for debugging.
+		//Offset
+		GL11.glTranslated(Offset.getX(), Offset.getY(), 0);
+		//Rotate
+		GL11.glRotated(Angle, 0, 0, 1);
+		//Drawing the Line
+		GL11.glBegin(GL11.GL_LINES);
+		GL11.glVertex2d(Geometry.getVertexes()[0].getX()*Geometry.getLDA() , Geometry.getVertexes()[0].getY()*Geometry.getLDA()); //Starts at negative value
+		GL11.glVertex2d(-1*Geometry.getVertexes()[0].getX()*Geometry.getLDA() , -1*Geometry.getVertexes()[0].getY()*Geometry.getLDA());
+		//end
+		GL11.glEnd();
+		//GL11.glLineWidth(1);
+		GL11.glPopMatrix();	
+	}
+	
+	 //TODO: Maybe change the circle's edge resolution?
+	public void renderCircle(){ //Renders a Circle
+		GL11.glPushMatrix();
+		
+		//Circle rotating excluded for now
+		//Drawing the Circle
+		GL11.glBegin(GL11.GL_LINE_LOOP);
+		for(int i = 0; i<250; i++) { //250 = edge resolution
+			double angle = (i*2*Math.PI/250);
+			GL11.glVertex2d(Offset.getX() + (Math.cos(angle) * Geometry.getLDA()/2), 
+					Offset.getY() + (Math.sin(angle) * Geometry.getLDA()/2)); //Offset accounted for here
+		}
+		//end
+		GL11.glEnd();
+		GL11.glPopMatrix();
+	}
+	
+	public void renderPolygon(){ //Renders a polygon assuming vertexes are in order
+		GL11.glPushMatrix();
+		
+		//Offset
+		GL11.glTranslated(Offset.getX(), Offset.getY(), 0);
+		//Rotate
+		GL11.glRotated(Angle, 0, 0, 1);
+		//Drawing the Regular Polygon
+		GL11.glBegin(GL11.GL_POLYGON);
+		for (int i = 0; i < Geometry.getVertexes().length; i++)
+			GL11.glVertex2d(Geometry.getVertexes()[i].getX() , Geometry.getVertexes()[i].getY());
+		//end
+		GL11.glEnd();
+		GL11.glPopMatrix();
+	}
 	
 	public Geom blindCollision(Geom B){ //Returns the hypothetical collision point as a NGeom
 		//maybe only have it return the vertexes and the offset, and let the other program decide weather or not to create a new Geom or just update one
-		Geom collideVert = null; // returned collision geom
 		//  Square colliding into Circle
 		if ((Geometry.getLDA() > 0 & Geometry.getVertexes().length == 0) & (B.getGeometry().getVertexes().length == 4 )){ 
-			//B is the Square
-			Vector2d Dir = Offset.subtract(B.getOffset());
-			Vector2d CollisionP; // collision point
-			double tempX;
-			double tempY;
-			double baX = Dir.getX()*Math.cos(-B.getAngleRad()) - Dir.getY()*Math.sin(-B.getAngleRad());
-			double baY = Dir.getX()*Math.sin(-B.getAngleRad()) + Dir.getY()*Math.cos(-B.getAngleRad());
-			
-			double halfLength = B.getGeometry().getSideLength()/2;
-
-			if ( baX < - halfLength) tempX = -halfLength;
-			else if (baX >  halfLength) tempX = halfLength;
-			else tempX = baX;
-
-			if (baY < - halfLength) tempY = - halfLength;
-			else if (baY > halfLength) tempY = halfLength;
-			else tempY = baY;
-			
-			Vector2d temp = new Vector2d(tempX, tempY);
-			CollisionP = temp.rotate(B.getAngleRad()).add(B.getOffset());
-			
-			collideVert = new Geom(0, 0, CollisionP, new Vector2d(0,0), new NGeom());
-			return collideVert;
+			return collisionSquareVsCircle(B);
 		} //RegPolygon Colliding into Line
-		else if ((B.getGeometry().getVertexes().length > 2) & (getGeometry().getVertexes().length == 1)) {
-			//B is the RegPolygon
-			double temp = Integer.MAX_VALUE;
-			Geom collideVert2 = new Geom();
-			for (int i = 0; i < B.getGeometry().getVertexes().length; i++) {//returns closest vertex to line
-				//System.out.println("Min to vertex: " + this.minDistPointToLine(B.getVectorPos(i)));
-				if (Math.abs(this.minDistPointToLine(B.getVectorPos(i))) <= temp) {
-					if (Math.abs(this.minDistPointToLine(B.getVectorPos(i))) == temp){
-						collideVert2.getGeometry().setVert(new Vector2d[]{collideVert2.getOffset().subtract(B.getVectorPos(i))});
-						collideVert2.getGeometry().setLDA(collideVert2.getGeometry().getVertexes()[0].magnitude());
-					}//if = temp	
-					collideVert2.setOffset(B.getVectorPos(i));
-					temp = Math.abs(this.minDistPointToLine(B.getVectorPos(i)));
-				}//if <= temp
-			}//For loop
-			return collideVert2;		
+		else if ((B.getGeometry().getVertexes().length > 2) & (getGeometry().getVertexes().length == 1) & (getGeometry().getLDA() < 0)) {
+			return collisionRegPolyVsLine(B);	
 		} else { //no collision detection code is made yet for this scenario
 			System.out.println("There is no Collision Detection code yet for this scenario");
 			return null;
 		}
 		
 	}//Collision
+	
+	public Geom collisionRegPolyVsLine(Geom B){ //Performs a RegPolygon Versus Line collision detection that spits out colliding line/point.
+		//B is the RegPolygon
+		double temp = Integer.MAX_VALUE;
+		Geom collideVert2 = new Geom();
+		for (int i = 0; i < B.getGeometry().getVertexes().length; i++) {//returns closest vertex to line
+			//System.out.println("Min to vertex: " + this.minDistPointToLine(B.getVectorPos(i)));
+			if (Math.abs(this.minDistPointToLine(B.getVectorPos(i))) <= temp) {
+				if (Math.abs(this.minDistPointToLine(B.getVectorPos(i))) == temp){
+					collideVert2.getGeometry().setVert(new Vector2d[]{collideVert2.getOffset().subtract(B.getVectorPos(i))});
+					collideVert2.getGeometry().setLDA(collideVert2.getGeometry().getVertexes()[0].magnitude());
+				}//if current == temp	
+				collideVert2.setOffset(B.getVectorPos(i));
+				temp = Math.abs(this.minDistPointToLine(B.getVectorPos(i)));
+			}//if <= temp
+		}//For loop
+		return collideVert2;
+	}
+	
+	public Geom collisionSquareVsCircle(Geom B){
+		//B is the Square
+		Vector2d Dir = Offset.subtract(B.getOffset());
+		Vector2d CollisionP; // collision point
+		Geom collideVert = new Geom();
+		double tempX;
+		double tempY;
+		double baX = Dir.getX()*Math.cos(-B.getAngleRad()) - Dir.getY()*Math.sin(-B.getAngleRad());
+		double baY = Dir.getX()*Math.sin(-B.getAngleRad()) + Dir.getY()*Math.cos(-B.getAngleRad());
+		
+		double halfLength = B.getGeometry().getSideLength()/2;
+
+		if ( baX < - halfLength) tempX = -halfLength;
+		else if (baX >  halfLength) tempX = halfLength;
+		else tempX = baX;
+
+		if (baY < - halfLength) tempY = - halfLength;
+		else if (baY > halfLength) tempY = halfLength;
+		else tempY = baY;
+		
+		Vector2d temp = new Vector2d(tempX, tempY);
+		CollisionP = temp.rotate(B.getAngleRad()).add(B.getOffset());
+		
+		collideVert = new Geom(0, 0, CollisionP, new Vector2d(0,0), new NGeom());
+		return collideVert;
+	}
 	
 }

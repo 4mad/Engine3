@@ -114,5 +114,4 @@ public class Vector2d {
 		double yPrime = x*Math.sin(angle) + y*Math.cos(angle);
 		return new Vector2d(xPrime, yPrime);
 	}
-	
 }

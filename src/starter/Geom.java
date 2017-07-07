@@ -1,6 +1,8 @@
 //David Govorko, 06/28/2017
 package starter;
+
 import org.lwjgl.opengl.GL11;
+
 /*Geom contains the following fields and methods:
  * FIELDS:
  * 	ANGLE: Angle of rotation in degrees
@@ -88,6 +90,12 @@ public class Geom {
 				+ ", Geometry = " + Geometry + "]";
 	}
 	
+	public void update(){ //Just adds velocity and DeltaAngle to original angle and offset
+		Offset = Offset.add(Velocity);
+		Angle += DeltaAngle;
+		if (Math.abs(Angle) == 360){ Angle = 0;} //to avoid int overflow
+	}
+	
 	public double minDistPointToLine(Vector2d point){ //returns the minimum distance from a Geom's center to a line;
 		double distance = 0;
 		if (this.getGeometry().getVertexes().length == 1){ 
@@ -108,7 +116,7 @@ public class Geom {
 	
 	//Renders the geometry by guessing the geometry type first from values of NGeom's fields.
 	//TODO: Optimize order of if statements --> Lazy conditionals
-	public void renderGeom(){
+	public void blindRenderGeom(){
 		//POINT V = 0 & LDA = 0
 		if (Geometry.getVertexes().length == 0 && Geometry.getLDA() == 0) {
 			GL11.glPushMatrix();
@@ -124,7 +132,7 @@ public class Geom {
 		} //LINE SEGMENT V = 1 & LDA = segment length
 		else if (Geometry.getVertexes().length == 1 && Geometry.getLDA() > 0){
 			GL11.glPushMatrix();
-			
+			//GL11.glLineWidth(3);
 			//Offset
 			GL11.glTranslated(Offset.getX(), Offset.getY(), 0);
 			//Rotate
@@ -135,10 +143,11 @@ public class Geom {
 			GL11.glVertex2d(Geometry.getVertexes()[0].getX() , Geometry.getVertexes()[0].getY());
 			//end
 			GL11.glEnd();
+			//GL11.glLineWidth(1);
 			GL11.glPopMatrix();	
 			
 		} //CIRCLE V = 0 & LDA = Diameter
-		  //TODO: Maybe change the cricle's edge resolution?
+		  //TODO: Maybe change the circle's edge resolution?
 		else if (Geometry.getVertexes().length == 0 && Geometry.getLDA() > 0){
 			GL11.glPushMatrix();
 			

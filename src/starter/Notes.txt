@@ -1,0 +1,27 @@
+TODO Conglomerate: (Add all TODOs here by section)
+
+	ACCURACY OVERALL :
+		1) Make it so that when doing vector = vector, small error can be taken into account. (Cut off imprecise digits? vector difference between error value?)
+		2) Find alternative for Collision accuracy, (currently dependent on velocity of object) 
+
+	COLLISION OVERALL:
+		1) Find way to better resolve collision of objects with rotation (Object gets stuck inside other object due to rotation post collision)
+
+	LINE COLLISION:
+		1)<X> Test out line collision against different geometries. 
+		2)<X> Make line collision return not just points but lines too (if whole side collides).
+		3)<X> Replace messy minLine to dist code with cleaner methods or variables?
+	
+	LINE SEGMENT COLLISINO:
+		1) Make a line segment collision detection, currently only LINE collision exists.
+		
+	LINE GEOM OBJECT DEFINITION:
+		1) Define a line object versus a Line segment in Geom ( renderGeom, collisionGeom).	
+	
+	INPUT:
+		1) Create a keyboard input detector.
+		2) Make it register up down left right movements.
+		
+	Geom:
+		1) Make non "blind" collision methods for each specific case.
+		2) Make non "blind" renderGeom methods for each specific case.

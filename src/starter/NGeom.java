@@ -45,4 +45,12 @@ public class NGeom {
 		return "NGeom [LDA = " + LDA + ", Vertexes = " + Arrays.toString(Vertexes) + "]";
 	}
 	
+	public double getSideLength(){ //Returns calculated side length if geometry is a regular polygon.
+		if (Vertexes.length > 2){
+			return LDA*Math.sin((Vertexes.length-2)*Math.PI/(Vertexes.length)/2); //LDA*sin(internal angle/2)
+		} else {
+			return 0;
+		}
+	}
+	
 }

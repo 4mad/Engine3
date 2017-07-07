@@ -35,12 +35,20 @@ public class Geom {
 		Geometry = geometry;		
 	}
 
-	public double getAngle() {
+	public double getAngle() { //Angle in degrees
 		return Angle;
+	}
+	
+	public double getAngleRad(){
+		return Angle*Math.PI/180;
 	}
 
 	public void setAngle(double angle) {
 		Angle = angle;
+	}
+	
+	public void setAngleRad(double angle) {
+		Angle = angle*180/Math.PI;
 	}
 
 	public double getDeltaAngle() {
@@ -78,6 +86,24 @@ public class Geom {
 	public String toString() {
 		return "Geom [Angle = " + Angle + ", DeltaAngle = " + DeltaAngle + ", Offset = " + Offset + ", Velocity = " + Velocity
 				+ ", Geometry = " + Geometry + "]";
+	}
+	
+	public double minDistPointToLine(Vector2d point){ //returns the minimum distance from a Geom's center to a line;
+		double distance = 0;
+		if (this.getGeometry().getVertexes().length == 1){ 
+			Vector2d pointAtOrigin  = point.subtract(this.getOffset());			
+			Vector2d lineOrigin = this.getGeometry().getVertexes()[0];
+			
+			return pointAtOrigin.subtract(lineOrigin).dot(lineOrigin.tangent())/lineOrigin.magnitude();
+		} else {
+			System.out.println("Sorry but this is not a line, this has " +  this.getGeometry().getVertexes().length + " many sides.");
+			return distance;
+		}
+		
+	}
+	
+	public Vector2d getVectorPos(int i){ //Gets specific vector's position.
+		return this.getGeometry().getVertexes()[i].rotate(this.getAngleRad()).add(this.getOffset());
 	}
 	
 	//Renders the geometry by guessing the geometry type first from values of NGeom's fields.
@@ -149,5 +175,57 @@ public class Geom {
 					+ "here is an attempt to print it out: " + Geometry.toString());
 		}
 	} // renderGeom()
+	
+	public Geom blindCollision(Geom B){ //Returns the hypothetical collision point as a NGeom
+		//maybe only have it return the vertexes and the offset, and let the other program decide weather or not to create a new Geom or just update one
+		Geom collideVert = null; // returned collision geom
+		//  Square colliding into Circle
+		if ((Geometry.getLDA() > 0 & Geometry.getVertexes().length == 0) & (B.getGeometry().getVertexes().length == 4 )){ 
+			//B is the Square
+			Vector2d Dir = Offset.subtract(B.getOffset());
+			Vector2d CollisionP; // collision point
+			double tempX;
+			double tempY;
+			double baX = Dir.getX()*Math.cos(-B.getAngleRad()) - Dir.getY()*Math.sin(-B.getAngleRad());
+			double baY = Dir.getX()*Math.sin(-B.getAngleRad()) + Dir.getY()*Math.cos(-B.getAngleRad());
+			
+			double halfLength = B.getGeometry().getSideLength()/2;
+
+			if ( baX < - halfLength) tempX = -halfLength;
+			else if (baX >  halfLength) tempX = halfLength;
+			else tempX = baX;
+
+			if (baY < - halfLength) tempY = - halfLength;
+			else if (baY > halfLength) tempY = halfLength;
+			else tempY = baY;
+			
+			Vector2d temp = new Vector2d(tempX, tempY);
+			CollisionP = temp.rotate(B.getAngleRad()).add(B.getOffset());
+			
+			collideVert = new Geom(0, 0, CollisionP, new Vector2d(0,0), new NGeom());
+			return collideVert;
+		} //RegPolygon Colliding into Line
+		else if ((B.getGeometry().getVertexes().length > 2) & (getGeometry().getVertexes().length == 1)) {
+			//B is the RegPolygon
+			double temp = Integer.MAX_VALUE;
+			Geom collideVert2 = new Geom();
+			for (int i = 0; i < B.getGeometry().getVertexes().length; i++) {//returns closest vertex to line
+				//System.out.println("Min to vertex: " + this.minDistPointToLine(B.getVectorPos(i)));
+				if (Math.abs(this.minDistPointToLine(B.getVectorPos(i))) <= temp) {
+					if (Math.abs(this.minDistPointToLine(B.getVectorPos(i))) == temp){
+						collideVert2.getGeometry().setVert(new Vector2d[]{collideVert2.getOffset().subtract(B.getVectorPos(i))});
+						collideVert2.getGeometry().setLDA(collideVert2.getGeometry().getVertexes()[0].magnitude());
+					}//if = temp	
+					collideVert2.setOffset(B.getVectorPos(i));
+					temp = Math.abs(this.minDistPointToLine(B.getVectorPos(i)));
+				}//if <= temp
+			}//For loop
+			return collideVert2;		
+		} else { //no collision detection code is made yet for this scenario
+			System.out.println("There is no Collision Detection code yet for this scenario");
+			return null;
+		}
+		
+	}//Collision
 	
 }

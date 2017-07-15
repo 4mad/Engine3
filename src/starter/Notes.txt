@@ -5,7 +5,7 @@ TODO Conglomerate: (Add all TODOs here by section)
 		2) Find alternative for Collision accuracy, (currently dependent on velocity of object) 
 
 	COLLISION OVERALL:
-		1) Find way to better resolve collision of objects with rotation (Object gets stuck inside other object due to rotation post collision)
+		1) Find way to better resolve collision of objects with rotation (Object gets stuck inside other object due to rotation post collision) (path finding)
 		2) Fix line segment generated from polygon side collision detection occasionally rendering from vertex into space instead of overlapping actual polygon side.
 
 	LINE COLLISION:
@@ -22,8 +22,8 @@ TODO Conglomerate: (Add all TODOs here by section)
 			B)<X> renderGeom
 	
 	INPUT:
-		1) Create a keyboard input detector.
-		2) Make it register up down left right movements.
+		1)<X> Create a keyboard input detector.
+		2)<X> Make it register up down left right movements.
 		
 	Geom:
 		1) <X>Make non "blind" collision methods for each specific case.

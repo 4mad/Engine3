@@ -138,6 +138,8 @@ public class RenderTester {
 		// the window or has pressed the ESCAPE key.
 		while ( !glfwWindowShouldClose(window) ) {
 				
+			glfwPollEvents();
+			
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 			glPointSize(1);//regular point size
 			glColor3d(1,1,1);//white
@@ -175,7 +177,9 @@ public class RenderTester {
 				glColor3d(0.5,0.9,0);//lime green
 				glColor3d(1,0.6,0);//orange
 				glColor3d(0,0.6,1);//some form of blue
-			*/
+			*/	
+				
+			keyInput(); // should it be here or after geom Move.
 			geomMove();//moves the Geoms
 			collision();
 			
@@ -310,6 +314,18 @@ public class RenderTester {
 				POLYGON2.setVelocity(POLYGON2.getVelocity().scalarMulti(-1)); // Basic visual response to collision
 				POLYGON2.setOffset(POLYGON2.getOffset().add(POLYGON2.getVelocity()));
 			}
+		}
+	}
+	
+	public void keyInput(){//Handles key inputs
+		if (glfwGetKey(window, GLFW_KEY_UP) == 1){
+			CIRCLE2.setOffset(CIRCLE2.getOffset().add(new Vector2d(0,1)));
+		} else if (glfwGetKey(window, GLFW_KEY_DOWN) == 1){
+			CIRCLE2.setOffset(CIRCLE2.getOffset().add(new Vector2d(0,-1)));
+		} else if (glfwGetKey(window, GLFW_KEY_LEFT) == 1){
+			CIRCLE2.setOffset(CIRCLE2.getOffset().add(new Vector2d(-1,0)));
+		} else if (glfwGetKey(window, GLFW_KEY_RIGHT) == 1){
+			CIRCLE2.setOffset(CIRCLE2.getOffset().add(new Vector2d(1,0)));
 		}
 	}
 	

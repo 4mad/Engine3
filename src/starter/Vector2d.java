@@ -2,6 +2,9 @@
 package starter;
 //A 2-d Vector object and a number of mathematical operations.
 
+import java.math.RoundingMode;
+import java.text.*;
+
 public class Vector2d {
 
 	private double x,y;
@@ -113,5 +116,16 @@ public class Vector2d {
 		double xPrime = x*Math.cos(angle) - y*Math.sin(angle);
 		double yPrime = x*Math.sin(angle) + y*Math.cos(angle);
 		return new Vector2d(xPrime, yPrime);
+	}
+	//Cuts down the vector to integer
+	public void trim(){
+		DecimalFormat df = new DecimalFormat("#.");
+		df.setRoundingMode(RoundingMode.DOWN);
+		x = Double.valueOf(df.format(x));
+		y = Double.valueOf(df.format(y));
+	}
+	//Checks how close to being the same two different vectors are to given accuracy.
+	public boolean similar(Vector2d B, double accuracy){
+		return this.subtract(B).magnitude() <= accuracy;
 	}
 }

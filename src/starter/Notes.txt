@@ -5,26 +5,50 @@ TODO Conglomerate: (Add all TODOs here by section)
 		2) Find alternative for Collision accuracy, (currently dependent on velocity of object) 
 
 	COLLISION OVERALL:
-		1) Find way to better resolve collision of objects with rotation (Object gets stuck inside other object due to rotation post collision) (path finding)
+		1)<X> Find way to better resolve collision of objects with rotation (Object gets stuck inside other object due to rotation post collision)
 		2) Fix line segment generated from polygon side collision detection occasionally rendering from vertex into space instead of overlapping actual polygon side.
+	
+	COLLISION DATA STORAGE:
+		1) Create a method that sorts collision geometries (points, lines, circles) into their respective hash sets.
+		2) Make it so the AI can differentiate between one collision object and another.
+		3) Make a temporary collision points hash that will be stored until it's parent geometry has been guessed
+	
+	Geom:<X>
+		1)<X> Make non "blind" collision methods for each specific case.
+		2)<X> Make non "blind" renderGeom methods for each specific case.
+	
+	GEOMETRY GUESSING:
+		1) Make geometry guessing algorithms work with 4 collision points
+			A)<X> Circle
+			B)<X> Line
+			C) Line Segment
+		2) Increase accuracy to 0.1% with 3 collisions
+	
+	LINE GEOM GEUSSER:
+		1) Currently cuts all value down to integers, make it more accurate.
+		2) Deals with vertical lines by doing a ==0 which is way too precise, make it more variable (function of inaccuracy?)
+	
+	INPUT:<X>
+		1)<X> Create a keyboard input detector.
+		2)<X> Make it register up down left right movements.
+		3)<X> Make a speed up velocity and slow down velocity button.
 
-	LINE COLLISION:
+	LINE COLLISION:<X>
 		1)<X> Test out line collision against different geometries. 
 		2)<X> Make line collision return not just points but lines too (if whole side collides).
-		3)<X> Replace messy minLine to dist code with cleaner methods or variables?
+		3)<X> Replace messy minLine to distance code with cleaner methods or variables?
 	
-	LINE SEGMENT COLLISINO:
-		1) Make a line segment collision detection, currently only LINE collision exists.
-		
 	LINE GEOM OBJECT DEFINITION:
 		1) Define a line object versus a Line segment in Geom 
 			A) collisionGeom
 			B)<X> renderGeom
 	
-	INPUT:
-		1)<X> Create a keyboard input detector.
-		2)<X> Make it register up down left right movements.
+	LINE SEGMENT COLLISION:
+		1) Make a line segment collision detection, currently only LINE collision exists.	
 		
-	Geom:
-		1) <X>Make non "blind" collision methods for each specific case.
-		2) <X>Make non "blind" renderGeom methods for each specific case.
+	MULTITHREADING:
+		1) Figure out how that even works and where it can be applied.
+		2) Apply to geom guessing, and collision point sorting?
+		
+	VECTOR2D:
+		1) Test similar method.

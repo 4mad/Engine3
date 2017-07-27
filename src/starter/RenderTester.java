@@ -43,7 +43,6 @@ public class RenderTester {
 	public Geom POLYGON = new Geom();
 	public Geom POLYGON2 = new Geom();
 	public Geom TRIANGLE = new Geom();
-	public Geom COLLISION = new Geom();
 	public Geom SQUARE = new Geom();
 	public Geom CIRCLE2 = new Geom();
 	
@@ -272,7 +271,7 @@ public class RenderTester {
 		SQUARE.update();
 		POLYGON2.update();
 	}
-	//TODO: Save all Collision points and have them updated by the results of the collision method
+	
 	public void collision(){ //Renders the collision point only if collision is almost imminent.
 		double D = SQUARE.getOffset().dist(CIRCLE2.getOffset());
 		double AB =  SQUARE.getGeometry().getLDA()/2*Math.sqrt(2) + CIRCLE2.getGeometry().getLDA()/2;

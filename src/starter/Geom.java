@@ -1,6 +1,9 @@
 //David Govorko, 06/28/2017
 package starter;
 
+import java.util.HashSet;
+import java.util.Iterator;
+
 import org.lwjgl.opengl.GL11;
 
 /*Geom contains the following fields and methods:
@@ -12,6 +15,8 @@ import org.lwjgl.opengl.GL11;
  * 	NGEOM: The base geometric unit 
  * METHODS:
  * 	RENDER: Renders the geometry
+ *  COLLISION: Collision between the geometry and another
+ *  GEOMGUESSER: Guesses the full geometry based on limited collision data.
  */
 //TODO: should color be a field && should velocity/deltaAngle be here???
 public class Geom {
@@ -237,37 +242,55 @@ public class Geom {
 			return null;
 		}
 		
-	}//Collision
-	
-	public Geom collisionRegPolyVsLine(Geom B){ //Performs a RegPolygon Versus Line collision detection that spits out colliding line/point.
-		//B is the RegPolygon
-		double temp = Integer.MAX_VALUE;
-		Geom collideVert2 = new Geom();
-		for (int i = 0; i < B.getGeometry().getVertexes().length; i++) {//returns closest vertex to line
-			//System.out.println("Min to vertex: " + this.minDistPointToLine(B.getVectorPos(i)));
-			if (Math.abs(this.minDistPointToLine(B.getVectorPos(i))) <= temp) {
-				if (Math.abs(this.minDistPointToLine(B.getVectorPos(i))) == temp){
-					collideVert2.getGeometry().setVert(new Vector2d[]{collideVert2.getOffset().subtract(B.getVectorPos(i))});
-					collideVert2.getGeometry().setLDA(collideVert2.getGeometry().getVertexes()[0].magnitude());
-				}//if current == temp	
-				collideVert2.setOffset(B.getVectorPos(i));
-				temp = Math.abs(this.minDistPointToLine(B.getVectorPos(i)));
-			}//if <= temp
-		}//For loop
-		return collideVert2;
 	}
 	
-	public Geom collisionSquareVsCircle(Geom B){
-		//B is the Square
-		Vector2d Dir = Offset.subtract(B.getOffset());
-		Vector2d CollisionP; // collision point
+	public Geom blindCollisionDebug(Geom B){ //Debug Version
+		System.out.println("blindCollision IS IN DEBUG MODE!");
+		System.out.print("This is the Geom in Question: " + B);
+		
+		//  Square colliding into Circle
+		if ((Geometry.getLDA() > 0 & Geometry.getVertexes().length == 0) & (B.getGeometry().getVertexes().length == 4 )){ 
+			return collisionSquareVsCircleDebug(B);
+		} //RegPolygon Colliding into Line
+		else if ((B.getGeometry().getVertexes().length > 2) & (getGeometry().getVertexes().length == 1) & (getGeometry().getLDA() < 0)) {
+			return collisionRegPolyVsLineDebug(B);	
+		} else { //no collision detection code is made yet for this scenario
+			System.out.println("There is no Collision Detection code yet for this scenario");
+			return null;
+		}
+		
+	}
+	
+	public Geom collisionRegPolyVsLine(Geom RegPolygon){ //Performs a RegPolygon Versus Line collision detection that spits out colliding line/point.
+		double temp = Integer.MAX_VALUE;
+		Geom collideVert = new Geom();
+		
+		for (int i = 0; i < RegPolygon.getGeometry().getVertexes().length; i++) {//returns closest vertex to line
+			
+			if (Math.abs(this.minDistPointToLine(RegPolygon.getVectorPos(i))) <= temp) {
+				
+				if (Math.abs(this.minDistPointToLine(RegPolygon.getVectorPos(i))) == temp){
+					collideVert.getGeometry().setVert(new Vector2d[]{collideVert.getOffset().subtract(RegPolygon.getVectorPos(i))});
+					collideVert.getGeometry().setLDA(collideVert.getGeometry().getVertexes()[0].magnitude());
+					
+				}//if current == temp	
+				collideVert.setOffset(RegPolygon.getVectorPos(i));
+				temp = Math.abs(this.minDistPointToLine(RegPolygon.getVectorPos(i)));
+				
+			}//if <= temp
+		}//For loop
+		return collideVert;
+	}
+	
+	public Geom collisionSquareVsCircle(Geom Square){
+		Vector2d Dir = Offset.subtract(Square.getOffset());
 		Geom collideVert = new Geom();
 		double tempX;
 		double tempY;
-		double baX = Dir.getX()*Math.cos(-B.getAngleRad()) - Dir.getY()*Math.sin(-B.getAngleRad());
-		double baY = Dir.getX()*Math.sin(-B.getAngleRad()) + Dir.getY()*Math.cos(-B.getAngleRad());
+		double baX = Dir.getX()*Math.cos(-Square.getAngleRad()) - Dir.getY()*Math.sin(-Square.getAngleRad());
+		double baY = Dir.getX()*Math.sin(-Square.getAngleRad()) + Dir.getY()*Math.cos(-Square.getAngleRad());
 		
-		double halfLength = B.getGeometry().getSideLength()/2;
+		double halfLength = Square.getGeometry().getSideLength()/2;
 
 		if ( baX < - halfLength) tempX = -halfLength;
 		else if (baX >  halfLength) tempX = halfLength;
@@ -278,10 +301,387 @@ public class Geom {
 		else tempY = baY;
 		
 		Vector2d temp = new Vector2d(tempX, tempY);
-		CollisionP = temp.rotate(B.getAngleRad()).add(B.getOffset());
 		
-		collideVert = new Geom(0, 0, CollisionP, new Vector2d(0,0), new NGeom());
+		collideVert = new Geom(0, 0, temp.rotate(Square.getAngleRad()).add(Square.getOffset()), new Vector2d(0,0), new NGeom());
 		return collideVert;
+	}
+	
+	public Geom collisionSquareVsCircleRefine(Geom Square, Vector2d OverEstimatedPoint, int Accuracy){
+		Geom ReverseSquare = new Geom();
+		ReverseSquare.setGeometry(Square.getGeometry());
+		Geom collideVert = new Geom();
+		collideVert.setOffset(new Vector2d(-1*this.getGeometry().getLDA(), -1*this.getGeometry().getLDA()));
+		double radiusComp = 0;
+		
+		ReverseSquare.setOffset(Square.getOffset().subtract(Square.getVelocity()));//Reset position to before collision.
+		ReverseSquare.setAngle(Square.getAngle() - Square.getDeltaAngle());
+		
+		ReverseSquare.setVelocity((Square.getVelocity()).scalarMulti(1.0/Accuracy));//Increase step by step accuracy
+		ReverseSquare.setDeltaAngle(Square.getDeltaAngle()/Accuracy);
+		
+		for (int i = 0; i < Accuracy; i++){//Find the closest point to the circle by comparing radius to point's distance to circle.
+			ReverseSquare.update();
+			
+			Vector2d Dir = this.getOffset().subtract(ReverseSquare.getOffset());
+			
+			double tempX;
+			double tempY; 
+			
+			double baX = Dir.getX()*Math.cos(-ReverseSquare.getAngleRad()) - Dir.getY()*Math.sin(-ReverseSquare.getAngleRad());
+			double baY = Dir.getX()*Math.sin(-ReverseSquare.getAngleRad()) + Dir.getY()*Math.cos(-ReverseSquare.getAngleRad());
+			
+			double halfLength = ReverseSquare.getGeometry().getSideLength()/2;
+			
+			if ( baX < - halfLength) tempX = -halfLength;
+			else if (baX >  halfLength) tempX = halfLength;
+			else tempX = baX;
+
+			if (baY < - halfLength) tempY = - halfLength;
+			else if (baY > halfLength) tempY = halfLength;
+			else tempY = baY;
+			
+			Vector2d temp = new Vector2d(tempX, tempY);
+			
+			radiusComp = (temp.rotate(ReverseSquare.getAngleRad()).add(ReverseSquare.getOffset())).dist(this.getOffset());
+			
+			if ((this.getGeometry().getLDA()/2 - radiusComp) <= 0)
+				collideVert = new Geom(0, 0, temp.rotate(ReverseSquare.getAngleRad()).add(ReverseSquare.getOffset()), new Vector2d(0,0), new NGeom());
+			else
+				i = Accuracy;
+		}
+
+		return collideVert;
+	}
+	
+	public Geom collisionRegPolyVsLineDebug(Geom RegPolygon){ //Debug version
+		System.out.println("collsiionRegPolyVsLine IS IN DEBUG MODE!");
+		
+		double temp = Integer.MAX_VALUE;
+		Geom collideVert = new Geom();
+		
+		for (int i = 0; i < RegPolygon.getGeometry().getVertexes().length; i++) {//returns closest vertex to line
+			System.out.println("Min to vertex: " + this.minDistPointToLine(RegPolygon.getVectorPos(i)));//Debug
+			
+			if (Math.abs(this.minDistPointToLine(RegPolygon.getVectorPos(i))) <= temp) {
+				if (Math.abs(this.minDistPointToLine(RegPolygon.getVectorPos(i))) == temp){
+					System.out.println("Full Side of Polygon Collision Detected");//Debug
+					
+					collideVert.getGeometry().setVert(new Vector2d[]{collideVert.getOffset().subtract(RegPolygon.getVectorPos(i))});
+					collideVert.getGeometry().setLDA(collideVert.getGeometry().getVertexes()[0].magnitude());
+					System.out.println("Line LDA: " + collideVert.getGeometry().getLDA());//Debug
+					System.out.println("Line direction vertex: " + collideVert.getGeometry().getVertexes()[0]);//Debug
+					
+				}//if current == temp	
+				collideVert.setOffset(RegPolygon.getVectorPos(i));
+				temp = Math.abs(this.minDistPointToLine(RegPolygon.getVectorPos(i)));
+				System.out.println("Temp min Distance: " + temp);//Debug
+				System.out.println("Collision point position: " + collideVert.getOffset());//Debug
+				
+			}//if <= temp
+		}//For loop
+		return collideVert;
+	}
+	
+	public Geom collisionSquareVsCircleDebug(Geom Square){//Debug Version
+		System.out.println("collisionSquareVsCircle IS IN DEBUG MODE!");//Debug only
+		
+		Vector2d Dir = Offset.subtract(Square.getOffset());
+		System.out.println("Direction vector from square to circle center: " + Dir);//Debug only
+		
+		Geom collideVert = new Geom();
+		double tempX;
+		double tempY;
+		
+		double baX = Dir.getX()*Math.cos(-Square.getAngleRad()) - Dir.getY()*Math.sin(-Square.getAngleRad());
+		double baY = Dir.getX()*Math.sin(-Square.getAngleRad()) + Dir.getY()*Math.cos(-Square.getAngleRad());
+		System.out.println("baX : " + baX);//Debug only
+		System.out.println("baY : " + baY);//Debug only
+		
+		double halfLength = Square.getGeometry().getSideLength()/2;		
+		System.out.println("Half of the side's length : " + halfLength);//Debug only
+
+		if ( baX < - halfLength) tempX = -halfLength;
+		else if (baX >  halfLength) tempX = halfLength;
+		else tempX = baX;
+
+		if (baY < - halfLength) tempY = - halfLength;
+		else if (baY > halfLength) tempY = halfLength;
+		else tempY = baY;
+		
+		Vector2d temp = new Vector2d(tempX, tempY);
+		System.out.println("temp vector: " + temp);//Debug only
+		
+		collideVert = new Geom(0, 0, temp.rotate(Square.getAngleRad()).add(Square.getOffset()), new Vector2d(0,0), new NGeom());
+		System.out.println("Collision Vertex : " + collideVert);
+		
+		return collideVert;
+	}
+	
+	public Geom collisionSquareVsCircleRefineDebug(Geom Square, Vector2d OverEstimatedPoint, int Accuracy){
+		System.out.println("collisionSquareVsCircleRefineDebug IS IN DEBUG MODE!");//Debug Only
+		System.out.println("With an accuracy of : " + Accuracy);//Debug Only
+		
+		Geom ReverseSquare = new Geom();
+		ReverseSquare.setGeometry(Square.getGeometry());
+		Geom collideVert = new Geom();
+		collideVert.setOffset(new Vector2d(-1*this.getGeometry().getLDA(), -1*this.getGeometry().getLDA()));
+		double radiusComp = 0;
+		
+		System.out.println("Velocity Magnitude is: " + Square.getVelocity().magnitude());//Debug Only
+		
+		ReverseSquare.setOffset(Square.getOffset().subtract(Square.getVelocity()));//Reset position to before collision.
+		ReverseSquare.setAngle(Square.getAngle() - Square.getDeltaAngle());
+		
+		ReverseSquare.setVelocity((Square.getVelocity()).scalarMulti(1.0/Accuracy));//Increase step by step accuracy
+		ReverseSquare.setDeltaAngle(Square.getDeltaAngle()/Accuracy);
+		System.out.println("Reverse Square Info : " + ReverseSquare);//Debug Only
+		System.out.println("Square Info : " + Square);//Debug Only
+		
+		for (int i = 0; i < Accuracy; i++){//Find the closest point to the circle by comparing radius to point's distance to circle.
+			ReverseSquare.update();
+			System.out.println("Start");
+			System.out.println("Reverse Square Info Begin Loop : " + ReverseSquare);//Debug Only
+			System.out.println("Loop Number : " + i);
+			
+			Vector2d Dir = this.getOffset().subtract(ReverseSquare.getOffset());
+			System.out.println("Direction vector from Reverse square to circle center: " + Dir);//Debug only
+			
+			double tempX;
+			double tempY; 
+			
+			double baX = Dir.getX()*Math.cos(-ReverseSquare.getAngleRad()) - Dir.getY()*Math.sin(-ReverseSquare.getAngleRad());
+			double baY = Dir.getX()*Math.sin(-ReverseSquare.getAngleRad()) + Dir.getY()*Math.cos(-ReverseSquare.getAngleRad());
+			System.out.println("baX : " + baX);//Debug only
+			System.out.println("baY : " + baY);//Debug only
+			
+			double halfLength = ReverseSquare.getGeometry().getSideLength()/2;
+			System.out.println("Half of the side's length : " + halfLength);//Debug only
+			
+			if ( baX < - halfLength) tempX = -halfLength;
+			else if (baX >  halfLength) tempX = halfLength;
+			else tempX = baX;
+
+			if (baY < - halfLength) tempY = - halfLength;
+			else if (baY > halfLength) tempY = halfLength;
+			else tempY = baY;
+			
+			Vector2d temp = new Vector2d(tempX, tempY);
+			System.out.println("temp vector: " + temp);//Debug only
+			
+			radiusComp = (temp.rotate(ReverseSquare.getAngleRad()).add(ReverseSquare.getOffset())).dist(this.getOffset());
+			System.out.println("radius Comparison : " + radiusComp);//Debug only
+			
+			if ((this.getGeometry().getLDA()/2 - radiusComp) <= 0)
+				collideVert = new Geom(0, 0, temp.rotate(ReverseSquare.getAngleRad()).add(ReverseSquare.getOffset()), new Vector2d(0,0), new NGeom());
+			else
+				i = Accuracy;
+			System.out.println("Collision Vertex : " + collideVert);//Debug only
+		}
+		System.out.println("Final COLLISION POINT: " + collideVert);
+		System.out.println("End");
+		
+		return collideVert;
+	}
+	
+	/*
+	public Geom blindGeomGuess(HashSet<Geom> collisionData){ //Returns the guessed geometry by analazying what geometry the collision points look most like
+		
+	}
+	*/
+	
+	public Geom kasaCircleGuess(HashSet<Geom> circleCollisionData) {//Guesses a circle's center and radius based on collision data
+		double aM,bM,rK = 0,A,B,C,D,E;//http://people.cas.uab.edu/~mosya/cl/CircleFitByKasa.cpp
+		double sumX2 = 0,sumX = 0, sumY2 = 0,sumY = 0,sumXY = 0,sumXY2 = 0,sumX3 = 0,sumX2Y = 0,sumY3 = 0;
+		int iterate = circleCollisionData.size();
+		Geom kasaCircle = new Geom();
+		Vector2d temp; //Iterating vector
+		
+		Iterator<Geom> iterator0 = circleCollisionData.iterator();
+		while (iterator0.hasNext()) {
+			temp = iterator0.next().getOffset();
+			
+			sumX2 +=  Math.pow(temp.getX(),2);
+			sumX += temp.getX();
+			sumY2 +=  Math.pow(temp.getY(),2);
+			sumY += temp.getY();
+			sumXY += temp.getX()*temp.getY();
+			sumXY2 += temp.getX()* Math.pow(temp.getY(),2);
+			sumX3 +=  Math.pow(temp.getX(),3);
+			sumX2Y += temp.getY()* Math.pow(temp.getX(),2);
+			sumY3 +=  Math.pow(temp.getY(),3);	
+		}
+
+		A = iterate*sumX2-sumX*sumX;
+		B = iterate*sumXY-sumX*sumY;
+		C = iterate*sumY2-sumY*sumY;
+		D =  0.5*(iterate*sumXY2-sumX*sumY2+iterate*sumX3-sumX*sumX2);
+		E =  0.5*(iterate*sumX2Y-sumX2*sumY+iterate*sumY3-sumY*sumY2);
+		
+		aM = (D*C-B*E)/(A*C-B*B);
+		bM = (A*E-B*D)/(A*C-B*B);
+
+		Iterator<Geom> iterator1 = circleCollisionData.iterator();
+		while (iterator1.hasNext()) {
+			temp = iterator1.next().getOffset();
+			rK += (Math.pow(temp.getX() - aM, 2) + Math.pow(temp.getY() - bM, 2))/iterate;
+		}
+		rK = Math.sqrt(rK);
+
+		kasaCircle.getGeometry().setLDA(2*rK);//Circle Lda = diameter so 2 * radius
+		kasaCircle.setOffset(new Vector2d(aM,bM));
+
+		// input  apache math library for covariance and see if it is faster.
+		return kasaCircle;
+	}
+	
+	public Geom kasaCircleGuessDebug(HashSet<Geom> circleCollisionData, Geom Circle) {//Debug Version
+		System.out.println("kasaCircleGuess IS IN DEGUB MODE!");//Debug only
+		
+		double aM,bM,rK = 0,A,B,C,D,E;//http://people.cas.uab.edu/~mosya/cl/CircleFitByKasa.cpp
+		double sumX2 = 0,sumX = 0, sumY2 = 0,sumY = 0,sumXY = 0,sumXY2 = 0,sumX3 = 0,sumX2Y = 0,sumY3 = 0;
+		int iterate = circleCollisionData.size();
+		System.out.println("Number of Collision Points: " + iterate);//Debug only
+		
+		Geom kasaCircle = new Geom();
+		Vector2d temp; //Iterating vector
+		
+		Iterator<Geom> iterator0 = circleCollisionData.iterator();
+		while (iterator0.hasNext()) {
+			temp = iterator0.next().getOffset();
+			System.out.println("Iterating vector: " + temp);//Debug only
+			
+			sumX2 +=  Math.pow(temp.getX(),2);
+			sumX += temp.getX();
+			sumY2 +=  Math.pow(temp.getY(),2);
+			sumY += temp.getY();
+			sumXY += temp.getX()*temp.getY();
+			sumXY2 += temp.getX()* Math.pow(temp.getY(),2);
+			sumX3 +=  Math.pow(temp.getX(),3);
+			sumX2Y += temp.getY()* Math.pow(temp.getX(),2);
+			sumY3 +=  Math.pow(temp.getY(),3);	
+		}
+		
+		System.out.println("sumX      : " + sumX);//Debug only
+		System.out.println("sumX2     : " + sumX2);//Debug only
+		System.out.println("sumX3     : " + sumX3);//Debug only
+		System.out.println("sumY      : " + sumY);//Debug only
+		System.out.println("sumY2     : " + sumY2);//Debug only
+		System.out.println("sumY3     : " + sumY3);//Debug only
+		System.out.println("sumXY     : " + sumXY);//Debug only
+		System.out.println("sumX2Y    : " + sumX2Y);//Debug only
+		System.out.println("sumXY2    : " + sumXY2);//Debug only
+
+		A = iterate*sumX2-sumX*sumX;
+		B = iterate*sumXY-sumX*sumY;
+		C = iterate*sumY2-sumY*sumY;
+		D =  0.5*(iterate*sumXY2-sumX*sumY2+iterate*sumX3-sumX*sumX2);
+		E =  0.5*(iterate*sumX2Y-sumX2*sumY+iterate*sumY3-sumY*sumY2);
+		
+		System.out.println("A  iterate*sumX2-sumX*sumX : " + A);//Debug only
+		System.out.println("B  iterate*sumXY-sumX*sumY  : " + B);//Debug only
+		System.out.println("C  iterate*sumY2-sumY*sumY  : " + C);//Debug only
+		System.out.println("D  0.5*(iterate*sumXY2-sumX*sumY2+iterate*sumX3-sumX*sumX2)  : " + D);//Debug only
+		System.out.println("E  0.5*(iterate*sumX2Y-sumX2*sumY+iterate*sumY3-sumY*sumY2)  : " + E);//Debug only
+
+		aM = (D*C-B*E)/(A*C-B*B);
+		bM = (A*E-B*D)/(A*C-B*B);
+
+		Iterator<Geom> iterator1 = circleCollisionData.iterator();
+		while (iterator1.hasNext()) {
+			temp = iterator1.next().getOffset();
+			rK += (Math.pow(temp.getX() - aM, 2) + Math.pow(temp.getY() - bM, 2))/iterate;
+		}
+		rK = Math.sqrt(rK);
+		System.out.println(2*rK + "   should be  " + Circle.getGeometry().getLDA());//Debug only
+		System.out.println(aM + "   should be  " + Circle.getOffset().getX());//Debug only
+		System.out.println(bM + "   should be  " + Circle.getOffset().getY());//Debug only
+
+		kasaCircle.getGeometry().setLDA(2*rK);//Circle Lda = diameter so 2 * radius
+		kasaCircle.setOffset(new Vector2d(aM,bM));
+
+		// input  apache math library for covariance and see if it is faster.
+		return kasaCircle;
+	}
+	
+	public Geom leastSquareLineGuess(HashSet<Geom> lineCollisionData){//Guesses a line based on collision data provided
+		double mX = 0,mY = 0,sumX2 = 0,sumXY = 0;//hotmath.com/hotmath_help/topics/line-of-best-fit.html
+		Geom lsLine = new Geom();
+		Vector2d temp; //Iterating vector
+		
+		Iterator<Geom> iterator0 = lineCollisionData.iterator();
+		while (iterator0.hasNext()) {
+			temp = iterator0.next().getOffset();
+			mX += temp.getX();
+			mY += temp.getY();
+		}
+
+		mX = mX/lineCollisionData.size();//Averages of x and y
+		mY = mY/lineCollisionData.size();
+					
+		Iterator<Geom> iterator1 = lineCollisionData.iterator();
+		while (iterator1.hasNext()) {
+			lsLine.setOffset(iterator1.next().getOffset());
+			sumX2 +=  Math.pow(lsLine.getOffset().getX() - mX, 2);
+			sumXY += (lsLine.getOffset().getX() - mX)*(lsLine.getOffset().getY() - mY);
+		}
+		
+		temp = new Vector2d(sumX2, sumXY);
+		
+		lsLine.setGeometry(new NGeom(-100*temp.magnitude(), new Vector2d[] {temp}));
+		
+		if (sumX2 == 0)//This in case the actual line is vertical so directonially x = 0 but y = almost infinity
+			lsLine.setGeometry(new NGeom(-123456780, new Vector2d[] {new Vector2d(0.0,1.0)}));
+				
+		return lsLine;
+	}
+	
+	public Geom leastSquareLineGuessDebug(HashSet<Geom> lineCollisionData, Geom Line){//Debug version
+		System.out.println("leastSquareLineGuess IS IN DEBUG MODE!");//Debug only
+
+		double mX = 0,mY = 0,sumX2 = 0,sumXY = 0;//hotmath.com/hotmath_help/topics/line-of-best-fit.html
+		Geom lsLine = new Geom();
+		Vector2d temp; //Iterating vector
+		
+		
+		Iterator<Geom> iterator0 = lineCollisionData.iterator();
+		System.out.println("Number of Collision Points: " + lineCollisionData.size());//Debug only
+		
+		while (iterator0.hasNext()) {
+			temp = iterator0.next().getOffset();
+			System.out.println("Iterating vector: " + temp);//Debug only
+			
+			mX += temp.getX();
+			mY += temp.getY();
+		}
+
+		mX = mX/lineCollisionData.size();//Averages of x and y
+		mY = mY/lineCollisionData.size();
+					
+		System.out.println("mX      : " + mX);//Debug only
+		System.out.println("mY      : " + mY);//Debug only
+		
+		Iterator<Geom> iterator1 = lineCollisionData.iterator();
+		while (iterator1.hasNext()) {
+			lsLine.setOffset(iterator1.next().getOffset());
+			sumX2 +=  Math.pow(lsLine.getOffset().getX() - mX, 2);
+			sumXY += (lsLine.getOffset().getX() - mX)*(lsLine.getOffset().getY() - mY);
+		}
+		
+		System.out.println("sumX2      : " + sumX2);//Debug only
+		System.out.println("sumXY      : " + sumXY);//Debug only
+		
+		temp = new Vector2d(sumX2, sumXY);
+		
+		lsLine.setGeometry(new NGeom(-100*temp.magnitude(), new Vector2d[] {temp}));
+		
+		if (sumX2 == 0)//This in case the actual line is vertical so directonially x = 0 but y = almost infinity
+			lsLine.setGeometry(new NGeom(-123456780, new Vector2d[] {new Vector2d(0.0,1.0)}));
+		
+		System.out.println(lsLine.getGeometry().getLDA() + "   should be  " + Line.getGeometry().getLDA());//Debug only
+		System.out.println(lsLine.getOffset() + "   should be  " + Line.getOffset());//Debug only
+		System.out.println(lsLine.getGeometry().getVertexes()[0] + "    should be  " + Line.getGeometry().getVertexes()[0]);
+		
+		return lsLine;
 	}
 	
 }

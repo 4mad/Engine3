@@ -117,15 +117,39 @@ public class Vector2d {
 		double yPrime = x*Math.sin(angle) + y*Math.cos(angle);
 		return new Vector2d(xPrime, yPrime);
 	}
-	//Cuts down the vector to integer
-	public void trim(){
-		DecimalFormat df = new DecimalFormat("#.");
-		df.setRoundingMode(RoundingMode.DOWN);
-		x = Double.valueOf(df.format(x));
-		y = Double.valueOf(df.format(y));
+	//Cuts down the vector to inputted decimal point up to 4 decimal points
+	public void trim(int i){
+		
+		if (i < 1){
+			DecimalFormat df = new DecimalFormat("#.");
+			df.setRoundingMode(RoundingMode.DOWN);
+			x = Double.valueOf(df.format(x));
+			y = Double.valueOf(df.format(y));
+		} else if (i == 1){
+			DecimalFormat df = new DecimalFormat("#.#");
+			df.setRoundingMode(RoundingMode.DOWN);
+			x = Double.valueOf(df.format(x));
+			y = Double.valueOf(df.format(y));
+		} else if (i == 2){
+			DecimalFormat df = new DecimalFormat("#.##");
+			df.setRoundingMode(RoundingMode.DOWN);
+			x = Double.valueOf(df.format(x));
+			y = Double.valueOf(df.format(y));
+		} else if (i == 3){
+			DecimalFormat df = new DecimalFormat("#.###");
+			df.setRoundingMode(RoundingMode.DOWN);
+			x = Double.valueOf(df.format(x));
+			y = Double.valueOf(df.format(y));
+		} else {
+			DecimalFormat df = new DecimalFormat("#.####");
+			df.setRoundingMode(RoundingMode.DOWN);
+			x = Double.valueOf(df.format(x));
+			y = Double.valueOf(df.format(y));
+		}
 	}
+	
 	//Checks how close to being the same two different vectors are to given accuracy.
-	public boolean similar(Vector2d B, double accuracy){
-		return this.subtract(B).magnitude() <= accuracy;
+	public boolean similar(Vector2d a, double accuracy){
+		return this.subtract(a).magnitude() <= accuracy;
 	}
 }

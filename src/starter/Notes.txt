@@ -1,7 +1,7 @@
 TODO Conglomerate: (Add all TODOs here by section)
 
 	ACCURACY OVERALL :
-		1) Make it so that when doing vector = vector, small error can be taken into account. (Cut off imprecise digits? vector difference between error value?)
+		1)<X> Make it so that when doing vector = vector, small error can be taken into account. (Cut off imprecise digits? vector difference between error value?)
 		2) Find alternative for Collision accuracy, (currently dependent on velocity of object) 
 
 	COLLISION OVERALL:
@@ -13,9 +13,13 @@ TODO Conglomerate: (Add all TODOs here by section)
 		2) Make it so the AI can differentiate between one collision object and another.
 		3) Make a temporary collision points hash that will be stored until it's parent geometry has been guessed
 	
-	Geom:<X>
+	DEBUG:
+		1) Implement debug across all used classes.
+	
+	Geom:
 		1)<X> Make non "blind" collision methods for each specific case.
 		2)<X> Make non "blind" renderGeom methods for each specific case.
+		3) Make a "blind" geomGuesser method that works to identify which geometry the collision points resembles the most.
 	
 	GEOMETRY GUESSING:
 		1) Make geometry guessing algorithms work with 4 collision points
@@ -25,8 +29,8 @@ TODO Conglomerate: (Add all TODOs here by section)
 		2) Increase accuracy to 0.1% with 3 collisions
 	
 	LINE GEOM GEUSSER:
-		1) Currently cuts all value down to integers, make it more accurate.
-		2) Deals with vertical lines by doing a ==0 which is way too precise, make it more variable (function of inaccuracy?)
+		1)<X> Currently cuts all value down to integers, make it more accurate.
+		2) Deals with vertical lines by doing a == 0 which is way too precise, make it more variable (function of inaccuracy?)
 	
 	INPUT:<X>
 		1)<X> Create a keyboard input detector.
@@ -51,4 +55,4 @@ TODO Conglomerate: (Add all TODOs here by section)
 		2) Apply to geom guessing, and collision point sorting?
 		
 	VECTOR2D:
-		1) Test similar method.
+		1)<X> Test similar method.

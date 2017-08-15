@@ -20,6 +20,8 @@ import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
 public class GeomGuessTester {//A way to test the geometry guessing software and collisions with the guessed geometry.
+		final Boolean debug = false;
+	
 		//Window & Buffer dimensions
 		static final int worldDimX = 1301;
 		static final int worldDimY = 700;
@@ -91,7 +93,11 @@ public class GeomGuessTester {//A way to test the geometry guessing software and
 			glfwWindowHint(GLFW_REFRESH_RATE, 60);// Ignored during windowed mode
 			
 			// Create the window only change stuff in windowHints
-			window = glfwCreateWindow(worldDimX, worldDimY, "Render Tester", NULL, NULL);
+			if (debug)
+				window = glfwCreateWindow(worldDimX, worldDimY, "DEBUG Geom Tester", NULL, NULL);
+			else
+				window = glfwCreateWindow(worldDimX, worldDimY, "Geom Tester", NULL, NULL);
+			
 			if ( window == NULL )
 				throw new RuntimeException("Failed to create the GLFW window");
 
@@ -135,6 +141,11 @@ public class GeomGuessTester {//A way to test the geometry guessing software and
 			
 			initGL();//Rendering screen creation
 			geomInit();//populates the Geoms and NGeoms
+			
+			//For Fps Counter
+			double previousTime = 0;
+			double currentTime = glfwGetTime();
+			int frameCount = 0;
 			
 			// Set the clear color
 			glClearColor(0.0f, 0.0f, 0.0f, 0.0f); //Black
@@ -188,6 +199,23 @@ public class GeomGuessTester {//A way to test the geometry guessing software and
 				// Poll for window events. The key callback above will only be
 				// invoked during this call.
 				glfwPollEvents();
+				
+				// Measure frames
+			    currentTime = glfwGetTime();
+			    frameCount++;
+			    // If a second has passed.
+			    if ( currentTime - previousTime >= 1.0 )
+			    {
+			        // Display the frame count here any way you want.
+			    	if (debug)
+			    		glfwSetWindowTitle(window, "DEBUG Geom Tester FPS: " + frameCount);
+			    	else
+			    		glfwSetWindowTitle(window, "Geom Tester FPS: " + frameCount);
+			    	
+			        frameCount = 0;
+			        previousTime = glfwGetTime();
+			    }
+				
 			} //While loop
 			
 		}
@@ -210,7 +238,7 @@ public class GeomGuessTester {//A way to test the geometry guessing software and
 			linear1.setLDA(-1*worldDimY/linear1.getVertexes()[0].magnitude());
 			
 			LINERIGHT.setGeometry(linear1);
-			LINERIGHT.setOffset(new Vector2d(localDimX-50,0));//Right Wall
+			LINERIGHT.setOffset(new Vector2d(localDimX,0));//Right Wall
 			
 			linear2.setVert(new Vector2d[] {new Vector2d(1,0)});
 			linear2.setLDA(-1*localDimX/linear2.getVertexes()[0].magnitude());
@@ -258,8 +286,8 @@ public class GeomGuessTester {//A way to test the geometry guessing software and
 			*/
 		}
 		
-		//Handles changes in Geom's positions/angles
-		public void geomMove(){
+		
+		public void geomMove(){ //Handles changes in Geom's positions/angles
 			SQUARE.update();
 		}
 		
@@ -275,10 +303,18 @@ public class GeomGuessTester {//A way to test the geometry guessing software and
 				Geom circleColide = CIRCLE.collisionSquareVsCircle(SQUARE);
 				glColor3d(1,0.6,0);//orange
 				glPointSize(5);
-				circleColide.renderPoint(); //Debugging
+				if (debug)
+					circleColide.renderPoint(); //Debugging
 				
 				if (circleColide.getOffset().dist(CIRCLE.getOffset()) <= CIRCLE.getGeometry().getLDA()/2) {//Detection when distance to vertex is shorter than radius
-					//System.out.println(CIRCLE.collisionSquareVsCircle(SQUARE));
+					if (debug){
+						System.out.println("Circle Square Collision Point: " + circleColide);//Debug
+						circleColide = CIRCLE.collisionSquareVsCircleRefineDebug(SQUARE, circleColide.getOffset(), 10);
+						System.out.println("Refined circle square Collision point : " + circleColide);
+					}
+					else 
+						circleColide = CIRCLE.collisionSquareVsCircleRefine(SQUARE, circleColide.getOffset(), 10);
+					
 					SQUARE.setVelocity(SQUARE.getVelocity().scalarMulti(-1)); // Basic visual response to collision
 					SQUARE.setOffset(SQUARE.getOffset().add(SQUARE.getVelocity()));
 					SQUARE.setDeltaAngle(SQUARE.getDeltaAngle()*-1);
@@ -289,11 +325,13 @@ public class GeomGuessTester {//A way to test the geometry guessing software and
 				Geom lineColide = LINETOP.collisionRegPolyVsLine(SQUARE);
 				glColor3d(1,0.6,0.1);//orange
 				glPointSize(3);
-				lineColide.blindRenderGeom(); //Debugging
+				if (debug)
+					lineColide.blindRenderGeom();//Debug
 				
-				//System.out.println("Min distance to center: " + centerDist);
 				if (L0/LINETOP.minDistPointToLine(lineColide.getOffset()) <= 0) {//Detection when vertex is on the opposite side of the line that the center is on, allows for collision from both sides of line
-					//System.out.println(lineColide); 
+					if (debug)
+						System.out.println("Top Line Poly Collision Geometry : " + lineColide);//Debug
+					
 					SQUARE.setVelocity(SQUARE.getVelocity().scalarMulti(-1)); // Basic visual response to collision
 					SQUARE.setOffset(SQUARE.getOffset().add(SQUARE.getVelocity()));
 					SQUARE.setDeltaAngle(SQUARE.getDeltaAngle()*-1);
@@ -303,15 +341,20 @@ public class GeomGuessTester {//A way to test the geometry guessing software and
 				Geom lineColide = LINERIGHT.collisionRegPolyVsLine(SQUARE);
 				glColor3d(1,0.6,0.1);//orange
 				glPointSize(3);
-				lineColide.blindRenderGeom(); //Debugging
+				if (debug)	
+					lineColide.blindRenderGeom(); //Debugging
 				
 				if (L1/LINERIGHT.minDistPointToLine(lineColide.getOffset()) <= 0) {//Detection when vertex is on the opposite side of the line that the center is on, allows for collision from both sides of line
+					if (debug)
+						System.out.println("Right Line Poly Collision Geometry : " + lineColide);//Debug
 					
 					SQUARE.setVelocity(SQUARE.getVelocity().scalarMulti(-1)); // Basic visual response to collision
 					SQUARE.setOffset(SQUARE.getOffset().add(SQUARE.getVelocity()));
 					SQUARE.setDeltaAngle(SQUARE.getDeltaAngle()*-1);
-					lineColide.getOffset().trim();
-					System.out.println(lineColide); 
+					lineColide.getOffset().trim(1);
+					if (debug)
+						System.out.println("Right Line Poly Collision Geometry after Trimming : " + lineColide);//Debug
+						
 					lineCollide.add(lineColide);
 				}
 			}
@@ -319,10 +362,13 @@ public class GeomGuessTester {//A way to test the geometry guessing software and
 				Geom lineColide = LINEBOTTOM.collisionRegPolyVsLine(SQUARE);
 				glColor3d(1,0.6,0.1);//orange
 				glPointSize(3);
-				lineColide.blindRenderGeom(); //Debugging
+				if (debug)	
+					lineColide.blindRenderGeom(); //Debugging
 				
 				if (L2/LINEBOTTOM.minDistPointToLine(lineColide.getOffset()) <= 0) {//Detection when vertex is on the opposite side of the line that the center is on, allows for collision from both sides of line
-					//System.out.println(lineColide); 
+					if (debug)
+						System.out.println("Bottom Line Poly Collision Geometry : " + lineColide);//Debug
+					
 					SQUARE.setVelocity(SQUARE.getVelocity().scalarMulti(-1)); // Basic visual response to collision
 					SQUARE.setOffset(SQUARE.getOffset().add(SQUARE.getVelocity()));
 					SQUARE.setDeltaAngle(SQUARE.getDeltaAngle()*-1);
@@ -332,10 +378,13 @@ public class GeomGuessTester {//A way to test the geometry guessing software and
 				Geom lineColide = LINELEFT.collisionRegPolyVsLine(SQUARE);
 				glColor3d(1,0.6,0.1);//orange
 				glPointSize(3);
-				lineColide.blindRenderGeom(); //Debugging
+				if (debug)
+					lineColide.blindRenderGeom(); //Debugging
 				
 				if (L3/LINELEFT.minDistPointToLine(lineColide.getOffset()) <= 0) {//Detection when vertex is on the opposite side of the line that the center is on, allows for collision from both sides of line
-					//System.out.println(lineColide); 
+					if (debug)
+						System.out.println("Left Line Poly Collision Geometry : " + lineColide);//Debug
+					
 					SQUARE.setVelocity(SQUARE.getVelocity().scalarMulti(-1)); // Basic visual response to collision
 					SQUARE.setOffset(SQUARE.getOffset().add(SQUARE.getVelocity()));
 					SQUARE.setDeltaAngle(SQUARE.getDeltaAngle()*-1);
@@ -344,7 +393,7 @@ public class GeomGuessTester {//A way to test the geometry guessing software and
 			
 		}
 		
-		public void keyInput(){//Handles key inputs
+		public void keyInput(){ //Handles key inputs
 			if (glfwGetKey(window, GLFW_KEY_UP) == 1){
 				SQUARE.setOffset(SQUARE.getOffset().add(new Vector2d(0,1).scalarMulti(SQUARE.getVelocity().magnitude()*2)));
 			}
@@ -358,12 +407,20 @@ public class GeomGuessTester {//A way to test the geometry guessing software and
 				SQUARE.setOffset(SQUARE.getOffset().add(new Vector2d(1,0).scalarMulti(SQUARE.getVelocity().magnitude()*2)));
 			}
 			if ((glfwGetKey(window, GLFW_KEY_SLASH) == 1 && (circleCollide.size() >= 4))){//Updates kasa circle guesser
-				tempCIRCLE = kasaCircleGuess(circleCollide);
+				if (debug) //Debug
+					tempCIRCLE = tempCIRCLE.kasaCircleGuessDebug(circleCollide, CIRCLE); 
+				else
+					tempCIRCLE =  tempCIRCLE.kasaCircleGuess(circleCollide);
+				
 				tempCIRCLE.renderCircle();
 				tempCIRCLE.setOffset(tempCIRCLE.getOffset().add(new Vector2d(localDimX, 0)));
 			} 
-			if ((glfwGetKey(window, GLFW_KEY_PERIOD) == 1 && (circleCollide.size() >= 4))){//Updates least square line guesser
-				tempLINE = leastSquareLineGuess(lineCollide);
+			if ((glfwGetKey(window, GLFW_KEY_PERIOD) == 1 && (lineCollide.size() >= 4))){//Updates least square line guesser
+				if (debug) //Debug
+					tempLINE = tempLINE.leastSquareLineGuessDebug(lineCollide, LINERIGHT);
+				else
+					tempLINE = tempLINE.leastSquareLineGuess(lineCollide);
+				
 				tempLINE.renderLine();
 				tempLINE.setOffset(tempLINE.getOffset().add(new Vector2d(localDimX, 0)));
 			} 
@@ -374,99 +431,9 @@ public class GeomGuessTester {//A way to test the geometry guessing software and
 				SQUARE.setVelocity(SQUARE.getVelocity().scalarMulti(1.05));
 			}
 		}
-		
-		public Geom kasaCircleGuess(HashSet<Geom> circleCollisionData) {//Guesses a circle's center and radius based on collision data
-			double aM,bM,rK = 0,A,B,C,D,E;//http://people.cas.uab.edu/~mosya/cl/CircleFitByKasa.cpp
-			double sumX2 = 0,sumX = 0, sumY2 = 0,sumY = 0,sumXY = 0,sumXY2 = 0,sumX3 = 0,sumX2Y = 0,sumY3 = 0;
-			int iterate = circleCollisionData.size();
-			Geom kasaCircle = new Geom();
-			Vector2d temp; //Iterating vector
-			
-			Iterator<Geom> iterator0 = circleCollisionData.iterator();
-			while (iterator0.hasNext()) {
-				temp = iterator0.next().getOffset();
-				//System.out.println(temp); //Debug
-				sumX2 +=  Math.pow(temp.getX(),2);
-				sumX += temp.getX();
-				sumY2 +=  Math.pow(temp.getY(),2);
-				sumY += temp.getY();
-				sumXY += temp.getX()*temp.getY();
-				sumXY2 += temp.getX()* Math.pow(temp.getY(),2);
-				sumX3 +=  Math.pow(temp.getX(),3);
-				sumX2Y += temp.getY()* Math.pow(temp.getX(),2);
-				sumY3 +=  Math.pow(temp.getY(),3);	
-			}
-
-			A = iterate*sumX2-sumX*sumX;
-			B = iterate*sumXY-sumX*sumY;
-			C = iterate*sumY2-sumY*sumY;
-			D =  0.5*(iterate*sumXY2-sumX*sumY2+iterate*sumX3-sumX*sumX2);
-			E =  0.5*(iterate*sumX2Y-sumX2*sumY+iterate*sumY3-sumY*sumY2);
-			
-			/*
-			System.out.println("A    : " + A);//Debug only
-			System.out.println("B    : " + B);//Debug only
-			System.out.println("C    : " + C);//Debug only
-			System.out.println("D    : " + D);//Debug only
-			System.out.println("E    : " + E);//Debug only
-			*/
-
-			aM = (D*C-B*E)/(A*C-B*B);
-			bM = (A*E-B*D)/(A*C-B*B);
-
-			Iterator<Geom> iterator1 = circleCollisionData.iterator();
-			while (iterator1.hasNext()) {
-				temp = iterator1.next().getOffset();
-				rK += (Math.pow(temp.getX() - aM, 2) + Math.pow(temp.getY() - bM, 2))/iterate;
-			}
-			rK = Math.sqrt(rK);
-			System.out.println(2*rK + "   should be  " + CIRCLE.getGeometry().getLDA());//Debug only
-			System.out.println(aM + "   should be  " + CIRCLE.getOffset().getX());//Debug only
-			System.out.println(bM + "   should be  " + CIRCLE.getOffset().getY());//Debug only
-
-			kasaCircle.getGeometry().setLDA(2*rK);//Circle Lda = diameter so 2 * radius
-			kasaCircle.setOffset(new Vector2d(aM,bM));
-
-			// input  apache math library for covariance and see if it is faster.
-			return kasaCircle;
-		}
-		
-		public Geom leastSquareLineGuess(HashSet<Geom> lineCollisionData){
-			double mX = 0,mY = 0,sumX2 = 0,sumXY = 0;//hotmath.com/hotmath_help/topics/line-of-best-fit.html
-			Geom lsLine = new Geom();
-			Vector2d temp; //Iterating vector
-			
-			Iterator<Geom> iterator0 = lineCollisionData.iterator();
-			while (iterator0.hasNext()) {
-				temp = iterator0.next().getOffset();
-				mX += temp.getX();
-				mY += temp.getY();
-			}
-
-			mX = mX/lineCollisionData.size();//Averages of x and y
-			mY = mY/lineCollisionData.size();
-						
-			Iterator<Geom> iterator1 = lineCollisionData.iterator();
-			while (iterator1.hasNext()) {
-				lsLine.setOffset(iterator1.next().getOffset());
-				sumX2 +=  Math.pow(lsLine.getOffset().getX() - mX, 2);
-				sumXY += (lsLine.getOffset().getX() - mX)*(lsLine.getOffset().getY() - mY);
-			}
-			
-			temp = new Vector2d(sumX2, sumXY);
-			
-			lsLine.setGeometry(new NGeom(-100*temp.magnitude(), new Vector2d[] {temp}));
-			
-			if (sumX2 == 0)//This in case the actual line is vertical so directonially x = 0 but y = almost infinity
-				lsLine.setGeometry(new NGeom(-123456780, new Vector2d[] {new Vector2d(0.0,1.0)}));
-			
-			System.out.println(lsLine);
-			
-			return lsLine;
-		}
-		
+				
 		public static void main(String[] args) {
 			new GeomGuessTester().run();
 		}
-		
+	
 }

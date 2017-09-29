@@ -71,6 +71,10 @@ public class GeomGuessTester {//A way to test the geometry guessing software and
 		Future<Geom> future; // https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/Future.html
 		boolean futureLive = false; // https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/Callable.html
 		
+		// Keyboard Input Handlers
+		int slash = 0;
+		int period = 0;
+		
 		// The window handle
 		private long window;
 		
@@ -418,6 +422,8 @@ public class GeomGuessTester {//A way to test the geometry guessing software and
 				SQUARE.setOffset(SQUARE.getOffset().add(new Vector2d(1,0).scalarMulti(SQUARE.getVelocity().magnitude()*2)));
 			}
 			if ((glfwGetKey(window, GLFW_KEY_SLASH) == GLFW_PRESS && (circleCollide.size() >= 4))){//Updates kasa circle guesser
+				if (slash == 0){// This part is only activated when the button is first pressed.
+					slash = 1;
 					if (debug) {// Debug
 						guesserThread = new GuesserThreadDebug("Thread: Circle", circleCollide, CIRCLE);
 						System.out.println("Circle Data passed to GusserThread");
@@ -428,9 +434,12 @@ public class GeomGuessTester {//A way to test the geometry guessing software and
 						System.out.println("CIRCLE THIS IS PROOF THAT THE GUESSER THREAD IS RUNNNNING ON ANOTHER THREAD AND THE MAIN THREAD DOES NOT CARE AND MOVES ON!");
 					} else
 						tempCIRCLE =  tempCIRCLE.kasaCircleGuess(circleCollide);
+				}
 				tempCIRCLE.renderCircle();
 			} 
 			if ((glfwGetKey(window, GLFW_KEY_PERIOD) == 1 && (lineCollide.size() >= 4))){//Updates least square line guesser
+				if (period == 0){// This part is only activated when the button is first pressed.
+					period = 1;
 					if (debug) {// Debug
 						guesserThread = new GuesserThreadDebug("Thread: Line", lineCollide, LINERIGHT);
 						System.out.println("Line Data passed to GusserThread");
@@ -442,6 +451,7 @@ public class GeomGuessTester {//A way to test the geometry guessing software and
 				
 					tempLINE.setOffset(tempLINE.getOffset().add(new Vector2d(localDimX, 0)));
 					
+				}
 				tempLINE.renderLine();
 			} 
 			if (glfwGetKey(window, GLFW_KEY_LEFT_BRACKET) == 1){//Decrease Speed
@@ -451,6 +461,8 @@ public class GeomGuessTester {//A way to test the geometry guessing software and
 				SQUARE.setVelocity(SQUARE.getVelocity().scalarMulti(1.05));
 			}
 			
+			slash *= glfwGetKey(window, GLFW_KEY_SLASH);// This indicates that the button has been released.
+			period *= glfwGetKey(window, GLFW_KEY_PERIOD);
 			
 			if (futureLive && future.isDone()){// This is to check if the future has content and is running. Should this be here? Create a concurrency Method?
 				System.out.println(future.isDone());

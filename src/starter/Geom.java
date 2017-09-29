@@ -534,7 +534,7 @@ public class Geom {
 		// input  apache math library for covariance and see if it is faster.
 		return kasaCircle;
 	}
-	
+/* Now in GeusserThreadDebug Class
 	public Geom kasaCircleGuessDebug(HashSet<Geom> circleCollisionData, Geom Circle) {//Debug Version
 		System.out.println("kasaCircleGuess IS IN DEGUB MODE!");//Debug only
 		
@@ -603,6 +603,7 @@ public class Geom {
 		// input  apache math library for covariance and see if it is faster.
 		return kasaCircle;
 	}
+	*/
 	
 	public Geom leastSquareLineGuess(HashSet<Geom> lineCollisionData){//Guesses a line based on collision data provided
 		double mX = 0,mY = 0,sumX2 = 0,sumXY = 0;//hotmath.com/hotmath_help/topics/line-of-best-fit.html

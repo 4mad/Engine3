@@ -20,7 +20,7 @@ import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
 public class GeomGuessTester {//A way to test the geometry guessing software and collisions with the guessed geometry.
-		final Boolean debug = false;
+		final Boolean debug = true;
 	
 		//Window & Buffer dimensions
 		static final int worldDimX = 1301;
@@ -252,7 +252,7 @@ public class GeomGuessTester {//A way to test the geometry guessing software and
 			LINELEFT.setGeometry(linear3);
 			LINELEFT.setOffset(new Vector2d(1,0));//Left Wall
 
-			circular.setLDA(200);
+			circular.setLDA(250);
 			
 			CIRCLE.setGeometry(circular);
 			CIRCLE.setOffset(new Vector2d(300,450));

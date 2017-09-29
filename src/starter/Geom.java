@@ -344,9 +344,9 @@ public class Geom {
 			
 			radiusComp = (temp.rotate(ReverseSquare.getAngleRad()).add(ReverseSquare.getOffset())).dist(this.getOffset());
 			
-			if ((this.getGeometry().getLDA()/2 - radiusComp) <= 0)
-				collideVert = new Geom(0, 0, temp.rotate(ReverseSquare.getAngleRad()).add(ReverseSquare.getOffset()), new Vector2d(0,0), new NGeom());
-			else
+			collideVert = new Geom(0, 0, temp.rotate(ReverseSquare.getAngleRad()).add(ReverseSquare.getOffset()), new Vector2d(0,0), new NGeom());
+			
+			if (radiusComp <= this.getGeometry().getLDA()/2)
 				i = Accuracy;
 		}
 
@@ -471,10 +471,11 @@ public class Geom {
 			radiusComp = (temp.rotate(ReverseSquare.getAngleRad()).add(ReverseSquare.getOffset())).dist(this.getOffset());
 			System.out.println("radius Comparison : " + radiusComp);//Debug only
 			
-			if ((this.getGeometry().getLDA()/2 - radiusComp) <= 0)
-				collideVert = new Geom(0, 0, temp.rotate(ReverseSquare.getAngleRad()).add(ReverseSquare.getOffset()), new Vector2d(0,0), new NGeom());
-			else
+			collideVert = new Geom(0, 0, temp.rotate(ReverseSquare.getAngleRad()).add(ReverseSquare.getOffset()), new Vector2d(0,0), new NGeom());
+			
+			if (radiusComp <= this.getGeometry().getLDA()/2)
 				i = Accuracy;
+				
 			System.out.println("Collision Vertex : " + collideVert);//Debug only
 		}
 		System.out.println("Final COLLISION POINT: " + collideVert);

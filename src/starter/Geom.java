@@ -1,9 +1,6 @@
 //David Govorko, 06/28/2017
 package starter;
 
-import java.util.HashSet;
-import java.util.Iterator;
-
 import org.lwjgl.opengl.GL11;
 
 /*Geom contains the following fields and methods:
@@ -16,7 +13,6 @@ import org.lwjgl.opengl.GL11;
  * METHODS:
  * 	RENDER: Renders the geometry
  *  COLLISION: Collision between the geometry and another
- *  GEOMGUESSER: Guesses the full geometry based on limited collision data.
  */
 //TODO: should color be a field && should velocity/deltaAngle be here???
 public class Geom {
@@ -213,7 +209,7 @@ public class Geom {
 		GL11.glPopMatrix();
 	}
 	
-	public void renderPolygon(){ //Renders a polygon assuming vertexes are in order
+	public void renderPolygon(){// Renders a polygon assuming vertexes are in order
 		GL11.glPushMatrix();
 		
 		//Offset
@@ -482,208 +478,6 @@ public class Geom {
 		System.out.println("End");
 		
 		return collideVert;
-	}
-	
-	/*
-	public Geom blindGeomGuess(HashSet<Geom> collisionData){ //Returns the guessed geometry by analazying what geometry the collision points look most like
-		
-	}
-	*/
-	
-	public Geom kasaCircleGuess(HashSet<Geom> circleCollisionData) {//Guesses a circle's center and radius based on collision data
-		double aM,bM,rK = 0,A,B,C,D,E;//http://people.cas.uab.edu/~mosya/cl/CircleFitByKasa.cpp
-		double sumX2 = 0,sumX = 0, sumY2 = 0,sumY = 0,sumXY = 0,sumXY2 = 0,sumX3 = 0,sumX2Y = 0,sumY3 = 0;
-		int iterate = circleCollisionData.size();
-		Geom kasaCircle = new Geom();
-		Vector2d temp; //Iterating vector
-		
-		Iterator<Geom> iterator0 = circleCollisionData.iterator();
-		while (iterator0.hasNext()) {
-			temp = iterator0.next().getOffset();
-			
-			sumX2 +=  Math.pow(temp.getX(),2);
-			sumX += temp.getX();
-			sumY2 +=  Math.pow(temp.getY(),2);
-			sumY += temp.getY();
-			sumXY += temp.getX()*temp.getY();
-			sumXY2 += temp.getX()* Math.pow(temp.getY(),2);
-			sumX3 +=  Math.pow(temp.getX(),3);
-			sumX2Y += temp.getY()* Math.pow(temp.getX(),2);
-			sumY3 +=  Math.pow(temp.getY(),3);	
-		}
-
-		A = iterate*sumX2-sumX*sumX;
-		B = iterate*sumXY-sumX*sumY;
-		C = iterate*sumY2-sumY*sumY;
-		D =  0.5*(iterate*sumXY2-sumX*sumY2+iterate*sumX3-sumX*sumX2);
-		E =  0.5*(iterate*sumX2Y-sumX2*sumY+iterate*sumY3-sumY*sumY2);
-		
-		aM = (D*C-B*E)/(A*C-B*B);
-		bM = (A*E-B*D)/(A*C-B*B);
-
-		Iterator<Geom> iterator1 = circleCollisionData.iterator();
-		while (iterator1.hasNext()) {
-			temp = iterator1.next().getOffset();
-			rK += (Math.pow(temp.getX() - aM, 2) + Math.pow(temp.getY() - bM, 2))/iterate;
-		}
-		rK = Math.sqrt(rK);
-
-		kasaCircle.getGeometry().setLDA(2*rK);//Circle Lda = diameter so 2 * radius
-		kasaCircle.setOffset(new Vector2d(aM,bM));
-
-		// input  apache math library for covariance and see if it is faster.
-		return kasaCircle;
-	}
-/* Now in GeusserThreadDebug Class
-	public Geom kasaCircleGuessDebug(HashSet<Geom> circleCollisionData, Geom Circle) {//Debug Version
-		System.out.println("kasaCircleGuess IS IN DEGUB MODE!");//Debug only
-		
-		double aM,bM,rK = 0,A,B,C,D,E;//http://people.cas.uab.edu/~mosya/cl/CircleFitByKasa.cpp
-		double sumX2 = 0,sumX = 0, sumY2 = 0,sumY = 0,sumXY = 0,sumXY2 = 0,sumX3 = 0,sumX2Y = 0,sumY3 = 0;
-		int iterate = circleCollisionData.size();
-		System.out.println("Number of Collision Points: " + iterate);//Debug only
-		
-		Geom kasaCircle = new Geom();
-		Vector2d temp; //Iterating vector
-		
-		Iterator<Geom> iterator0 = circleCollisionData.iterator();
-		while (iterator0.hasNext()) {
-			temp = iterator0.next().getOffset();
-			System.out.println("Iterating vector: " + temp);//Debug only
-			
-			sumX2 +=  Math.pow(temp.getX(),2);
-			sumX += temp.getX();
-			sumY2 +=  Math.pow(temp.getY(),2);
-			sumY += temp.getY();
-			sumXY += temp.getX()*temp.getY();
-			sumXY2 += temp.getX()* Math.pow(temp.getY(),2);
-			sumX3 +=  Math.pow(temp.getX(),3);
-			sumX2Y += temp.getY()* Math.pow(temp.getX(),2);
-			sumY3 +=  Math.pow(temp.getY(),3);	
-		}
-		
-		System.out.println("sumX      : " + sumX);//Debug only
-		System.out.println("sumX2     : " + sumX2);//Debug only
-		System.out.println("sumX3     : " + sumX3);//Debug only
-		System.out.println("sumY      : " + sumY);//Debug only
-		System.out.println("sumY2     : " + sumY2);//Debug only
-		System.out.println("sumY3     : " + sumY3);//Debug only
-		System.out.println("sumXY     : " + sumXY);//Debug only
-		System.out.println("sumX2Y    : " + sumX2Y);//Debug only
-		System.out.println("sumXY2    : " + sumXY2);//Debug only
-
-		A = iterate*sumX2-sumX*sumX;
-		B = iterate*sumXY-sumX*sumY;
-		C = iterate*sumY2-sumY*sumY;
-		D =  0.5*(iterate*sumXY2-sumX*sumY2+iterate*sumX3-sumX*sumX2);
-		E =  0.5*(iterate*sumX2Y-sumX2*sumY+iterate*sumY3-sumY*sumY2);
-		
-		System.out.println("A  iterate*sumX2-sumX*sumX : " + A);//Debug only
-		System.out.println("B  iterate*sumXY-sumX*sumY  : " + B);//Debug only
-		System.out.println("C  iterate*sumY2-sumY*sumY  : " + C);//Debug only
-		System.out.println("D  0.5*(iterate*sumXY2-sumX*sumY2+iterate*sumX3-sumX*sumX2)  : " + D);//Debug only
-		System.out.println("E  0.5*(iterate*sumX2Y-sumX2*sumY+iterate*sumY3-sumY*sumY2)  : " + E);//Debug only
-
-		aM = (D*C-B*E)/(A*C-B*B);
-		bM = (A*E-B*D)/(A*C-B*B);
-
-		Iterator<Geom> iterator1 = circleCollisionData.iterator();
-		while (iterator1.hasNext()) {
-			temp = iterator1.next().getOffset();
-			rK += (Math.pow(temp.getX() - aM, 2) + Math.pow(temp.getY() - bM, 2))/iterate;
-		}
-		rK = Math.sqrt(rK);
-		System.out.println(2*rK + "   should be  " + Circle.getGeometry().getLDA());//Debug only
-		System.out.println(aM + "   should be  " + Circle.getOffset().getX());//Debug only
-		System.out.println(bM + "   should be  " + Circle.getOffset().getY());//Debug only
-
-		kasaCircle.getGeometry().setLDA(2*rK);//Circle Lda = diameter so 2 * radius
-		kasaCircle.setOffset(new Vector2d(aM,bM));
-
-		// input  apache math library for covariance and see if it is faster.
-		return kasaCircle;
-	}
-	*/
-	
-	public Geom leastSquareLineGuess(HashSet<Geom> lineCollisionData){//Guesses a line based on collision data provided
-		double mX = 0,mY = 0,sumX2 = 0,sumXY = 0;//hotmath.com/hotmath_help/topics/line-of-best-fit.html
-		Geom lsLine = new Geom();
-		Vector2d temp; //Iterating vector
-		
-		Iterator<Geom> iterator0 = lineCollisionData.iterator();
-		while (iterator0.hasNext()) {
-			temp = iterator0.next().getOffset();
-			mX += temp.getX();
-			mY += temp.getY();
-		}
-
-		mX = mX/lineCollisionData.size();//Averages of x and y
-		mY = mY/lineCollisionData.size();
-					
-		Iterator<Geom> iterator1 = lineCollisionData.iterator();
-		while (iterator1.hasNext()) {
-			lsLine.setOffset(iterator1.next().getOffset());
-			sumX2 +=  Math.pow(lsLine.getOffset().getX() - mX, 2);
-			sumXY += (lsLine.getOffset().getX() - mX)*(lsLine.getOffset().getY() - mY);
-		}
-		
-		temp = new Vector2d(sumX2, sumXY);
-		
-		lsLine.setGeometry(new NGeom(-100*temp.magnitude(), new Vector2d[] {temp}));
-		
-		if (sumX2 == 0)//This in case the actual line is vertical so directonially x = 0 but y = almost infinity
-			lsLine.setGeometry(new NGeom(-123456780, new Vector2d[] {new Vector2d(0.0,1.0)}));
-				
-		return lsLine;
-	}
-	
-	public Geom leastSquareLineGuessDebug(HashSet<Geom> lineCollisionData, Geom Line){//Debug version
-		System.out.println("leastSquareLineGuess IS IN DEBUG MODE!");//Debug only
-
-		double mX = 0,mY = 0,sumX2 = 0,sumXY = 0;//hotmath.com/hotmath_help/topics/line-of-best-fit.html
-		Geom lsLine = new Geom();
-		Vector2d temp; //Iterating vector
-		
-		
-		Iterator<Geom> iterator0 = lineCollisionData.iterator();
-		System.out.println("Number of Collision Points: " + lineCollisionData.size());//Debug only
-		
-		while (iterator0.hasNext()) {
-			temp = iterator0.next().getOffset();
-			System.out.println("Iterating vector: " + temp);//Debug only
-			
-			mX += temp.getX();
-			mY += temp.getY();
-		}
-
-		mX = mX/lineCollisionData.size();//Averages of x and y
-		mY = mY/lineCollisionData.size();
-					
-		System.out.println("mX      : " + mX);//Debug only
-		System.out.println("mY      : " + mY);//Debug only
-		
-		Iterator<Geom> iterator1 = lineCollisionData.iterator();
-		while (iterator1.hasNext()) {
-			lsLine.setOffset(iterator1.next().getOffset());
-			sumX2 +=  Math.pow(lsLine.getOffset().getX() - mX, 2);
-			sumXY += (lsLine.getOffset().getX() - mX)*(lsLine.getOffset().getY() - mY);
-		}
-		
-		System.out.println("sumX2      : " + sumX2);//Debug only
-		System.out.println("sumXY      : " + sumXY);//Debug only
-		
-		temp = new Vector2d(sumX2, sumXY);
-		
-		lsLine.setGeometry(new NGeom(-100*temp.magnitude(), new Vector2d[] {temp}));
-		
-		if (sumX2 == 0)//This in case the actual line is vertical so directonially x = 0 but y = almost infinity
-			lsLine.setGeometry(new NGeom(-123456780, new Vector2d[] {new Vector2d(0.0,1.0)}));
-		
-		System.out.println(lsLine.getGeometry().getLDA() + "   should be  " + Line.getGeometry().getLDA());//Debug only
-		System.out.println(lsLine.getOffset() + "   should be  " + Line.getOffset());//Debug only
-		System.out.println(lsLine.getGeometry().getVertexes()[0] + "    should be  " + Line.getGeometry().getVertexes()[0]);
-		
-		return lsLine;
 	}
 	
 }

@@ -1,4 +1,4 @@
-TODO Conglomerate: (Add all TODOs here by section)
+TODO Conglomerate: 
 
 	ACCURACY OVERALL :
 		1)<X> Make it so that when doing vector = vector, small error can be taken into account. (Cut off imprecise digits? vector difference between error value?)
@@ -46,13 +46,17 @@ TODO Conglomerate: (Add all TODOs here by section)
 		1) Define a line object versus a Line segment in Geom 
 			A) collisionGeom
 			B)<X> renderGeom
+			C) guesserThread
 	
 	LINE SEGMENT COLLISION:
 		1) Make a line segment collision detection, currently only LINE collision exists.	
 		
 	MULTITHREADING:
-		1) Figure out how that even works and where it can be applied.
-		2) Apply to geom guessing, and collision point sorting?
+		1)<X> Figure out how that even works and where it can be applied.
+		2)<X> Apply to Geom guessing,
+		3)<X> collision point? --> Time critical, maybe collision point refining?
+		4) collision point Refining?
+		5) sorting?
 		
 	VECTOR2D:
 		1)<X> Test similar method.

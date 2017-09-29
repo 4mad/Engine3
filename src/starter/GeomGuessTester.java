@@ -3,7 +3,6 @@ package starter;
 //Copy paste lwjgl set up from https://www.lwjgl.org/guide
 //More documentation on GLFW http://www.glfw.org/docs/latest/window_guide.html
 
-
 import org.lwjgl.*;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
@@ -12,6 +11,10 @@ import org.lwjgl.system.*;
 import java.nio.*;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
@@ -59,6 +62,14 @@ public class GeomGuessTester {//A way to test the geometry guessing software and
 		//Collision detection set
 		HashSet<Geom> circleCollide = new HashSet<Geom>();//Contains points of circle collision
 		HashSet<Geom> lineCollide = new HashSet<Geom>();//Contains points of line collision
+		
+		//GuesserThread creation
+		GuesserThreadDebug guesserThread;
+		
+		//Concurrency Setup // http://winterbe.com/posts/2015/04/07/java8-concurrency-tutorial-thread-executor-examples/
+		ExecutorService service =  Executors.newSingleThreadExecutor(); // https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/Executor.html
+		Future<Geom> future; // https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/Future.html
+		boolean futureLive = false; // https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/Callable.html
 		
 		// The window handle
 		private long window;
@@ -291,7 +302,7 @@ public class GeomGuessTester {//A way to test the geometry guessing software and
 			SQUARE.update();
 		}
 		
-		public void collision(){ //Renders the collision point only if collision is 10 frames away from occuring.
+		public void collision(){ //Renders the collision point only if collision is 10 frames away from occurring.
 			double D = SQUARE.getOffset().dist(CIRCLE.getOffset());
 			double AB = SQUARE.getGeometry().getLDA()/2*Math.sqrt(2) + CIRCLE.getGeometry().getLDA()/2;
 			double L0 = LINETOP.minDistPointToLine(SQUARE.getOffset());
@@ -393,42 +404,68 @@ public class GeomGuessTester {//A way to test the geometry guessing software and
 			
 		}
 		
-		public void keyInput(){ //Handles key inputs
-			if (glfwGetKey(window, GLFW_KEY_UP) == 1){
+		public void keyInput(){ //Handles key inputs where GLFW_PRESS == 1
+			if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
 				SQUARE.setOffset(SQUARE.getOffset().add(new Vector2d(0,1).scalarMulti(SQUARE.getVelocity().magnitude()*2)));
 			}
-			if (glfwGetKey(window, GLFW_KEY_DOWN) == 1){
+			if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
 				SQUARE.setOffset(SQUARE.getOffset().add(new Vector2d(0,-1).scalarMulti(SQUARE.getVelocity().magnitude()*2)));
 			}
-			if (glfwGetKey(window, GLFW_KEY_LEFT) == 1){
+			if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS){
 				SQUARE.setOffset(SQUARE.getOffset().add(new Vector2d(-1,0).scalarMulti(SQUARE.getVelocity().magnitude()*2)));
 			}
-			if (glfwGetKey(window, GLFW_KEY_RIGHT) == 1){
+			if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){
 				SQUARE.setOffset(SQUARE.getOffset().add(new Vector2d(1,0).scalarMulti(SQUARE.getVelocity().magnitude()*2)));
 			}
-			if ((glfwGetKey(window, GLFW_KEY_SLASH) == 1 && (circleCollide.size() >= 4))){//Updates kasa circle guesser
-				if (debug) //Debug
-					tempCIRCLE = tempCIRCLE.kasaCircleGuessDebug(circleCollide, CIRCLE); 
-				else
-					tempCIRCLE =  tempCIRCLE.kasaCircleGuess(circleCollide);
-				
+			if ((glfwGetKey(window, GLFW_KEY_SLASH) == GLFW_PRESS && (circleCollide.size() >= 4))){//Updates kasa circle guesser
+					if (debug) {// Debug
+						guesserThread = new GuesserThreadDebug("Thread: Circle", circleCollide, CIRCLE);
+						System.out.println("Circle Data passed to GusserThread");
+						future = service.submit(guesserThread);// Maybe have a condition to check if future is in use atm?
+						futureLive = true;
+						System.out.println(future.isDone());
+						
+						System.out.println("CIRCLE THIS IS PROOF THAT THE GUESSER THREAD IS RUNNNNING ON ANOTHER THREAD AND THE MAIN THREAD DOES NOT CARE AND MOVES ON!");
+					} else
+						tempCIRCLE =  tempCIRCLE.kasaCircleGuess(circleCollide);
 				tempCIRCLE.renderCircle();
-				tempCIRCLE.setOffset(tempCIRCLE.getOffset().add(new Vector2d(localDimX, 0)));
 			} 
 			if ((glfwGetKey(window, GLFW_KEY_PERIOD) == 1 && (lineCollide.size() >= 4))){//Updates least square line guesser
-				if (debug) //Debug
-					tempLINE = tempLINE.leastSquareLineGuessDebug(lineCollide, LINERIGHT);
-				else
-					tempLINE = tempLINE.leastSquareLineGuess(lineCollide);
+					if (debug) {// Debug
+						guesserThread = new GuesserThreadDebug("Thread: Line", lineCollide, LINERIGHT);
+						System.out.println("Line Data passed to GusserThread");
+						// use another future? future = service.submit(guesserThread);// Maybe have a condition to check if future is in use atm?
+						
+						System.out.println("LINE THIS IS PROOF THAT THE GUESSER THREAD IS RUNNNNING ON ANOTHER THREAD AND THE MAIN THREAD DOES NOT CARE AND MOVES ON!");
+					} else
+						tempLINE = tempLINE.leastSquareLineGuess(lineCollide);
 				
+					tempLINE.setOffset(tempLINE.getOffset().add(new Vector2d(localDimX, 0)));
+					
 				tempLINE.renderLine();
-				tempLINE.setOffset(tempLINE.getOffset().add(new Vector2d(localDimX, 0)));
 			} 
 			if (glfwGetKey(window, GLFW_KEY_LEFT_BRACKET) == 1){//Decrease Speed
 				SQUARE.setVelocity(SQUARE.getVelocity().scalarMulti(0.95));
 			}
 			if (glfwGetKey(window, GLFW_KEY_RIGHT_BRACKET) == 1){//Increase Speed
 				SQUARE.setVelocity(SQUARE.getVelocity().scalarMulti(1.05));
+			}
+			
+			
+			if (futureLive && future.isDone()){// This is to check if the future has content and is running. Should this be here? Create a concurrency Method?
+				System.out.println(future.isDone());
+				try {
+					tempCIRCLE = future.get();
+					tempCIRCLE.setOffset(tempCIRCLE.getOffset().add(new Vector2d(localDimX, 0)));
+				} catch (InterruptedException e) {
+					
+					e.printStackTrace();
+				} catch (ExecutionException e) {
+					
+					e.printStackTrace();
+				}
+				
+				futureLive = false;
 			}
 		}
 				

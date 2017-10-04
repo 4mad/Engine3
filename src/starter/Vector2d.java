@@ -1,155 +1,185 @@
-//David Govorko, 03/16/2017
+// David Govorko, 03/16/2017
 package starter;
-//A 2-d Vector object and a number of mathematical operations.
-
+// A 2-d Vector object and a number of mathematical operations.
 import java.math.RoundingMode;
 import java.text.*;
 
+/*Vector2d contains the following:
+ * FIELDS:
+ *  DOUBLE x: X coordinate
+ *  DOUBLE y: Y coordinate
+ * 
+ * CONTRUCTORs:
+ *  Vector2d(): Default 0,0
+ *  Vector2d(double x, double y): User fills all fields
+ *  
+ * Methods:
+ *  String toString(): To String
+ *  Double dist(Vector2d a): Distance calculation
+ *  Double dot(Vector2d a): Dot product
+ *  Vector2d add(Vector2d a): Vector addition
+ *  Vector2d subtract(Vector2d a): Vector subtraction
+ *  Double magnitude(): Magnitude of vector
+ *  Double cross(Vector2d a): Magnitude of vector multiplication
+ *  Double angleX(): Angle (radians) between Vector and positive X axis
+ *  Double angleOtherX(): Other Angle (radians) between Vector and negative X axis
+ *  Double angleY(): Angle (radians) between Vector and positive Y axis
+ *  Double angleOtherY(): Other Angle (radians) between Vector and negative Y axis
+ *  Vector2d unitize(): Turn Vector into a Unit vector
+ *  Vector2d scalarMulti(double a): Scalar multiplication of Vector
+ *  Double angleBetween(Vector2d a): Angle (radians) between two vectors
+ *  Vector2d tangent(): Create tangent vector object
+ *  Vector2d deepCopy(): Deep Copy = Make new vector object
+ *  Vector2d integizerFloor(): Keep as doubles but remove decimals by flooring
+ *  Vector2d integizerCeil(): Keep as doubles but remove decimals by ceiling
+ *  Vector2d rotate(double angle): Returns new rotated (radians) vector object
+ *  Void trim(int i): Cuts down the vector to inputed decimal point up to 4 decimal points
+ *  Boolean similar(Vector2d a, double accuracy): Checks magnitude of vector difference to given accuracy.
+ */
 public class Vector2d {
 
-	private double x,y;
+	private double X,Y;
 	
-	public Vector2d() {
-	  x=0;
-	  y=0;		
+	public Vector2d(){
+	  X = 0;
+	  Y = 0;		
 	}
 	
-	public Vector2d(double X, double Y) {
-		x = X;
-		y = Y;		
+	public Vector2d(double x, double y){
+		X = x;
+		Y = y;		
 	}
 	
-	public double getX() {
-		return x;
+	public double getX(){
+		return X;
 	}
 
-	public void setX(double x) {
-		this.x = x;
+	public void setX(double x){
+		this.X = x;
 	}
 
-	public double getY() {
-		return y;
+	public double getY(){
+		return Y;
 	}
 
-	public void setY(double y) {
-		this.y = y;
+	public void setY(double y){
+		this.Y = y;
 	}
 	
-	public String toString() {
+	public String toString(){
 		return "<" + getX() + " , " + getY() + ">";
 	}
-	//Distance
-	public double dist(Vector2d a) {
-		return Math.sqrt(Math.pow(x-a.x,2)+Math.pow(y-a.y,2));	
+	
+	public double dist(Vector2d a){// Distance
+		return Math.sqrt(Math.pow(X-a.X,2)+Math.pow(Y-a.Y,2));	
 	}	
-	//Dot product
-	public double dot(Vector2d a)	{
-		return x*a.getX() + y*a.getY();
+	
+	public double dot(Vector2d a){// Dot product
+		return X*a.getX() + Y*a.getY();
 	}
-	//Vector Addition
-	public Vector2d add(Vector2d a)	{
-		double i = x + a.getX();
-		double j = y + a.getY();
+	
+	public Vector2d add(Vector2d a){// Vector addition
+		double i = X + a.getX();
+		double j = Y + a.getY();
 		return new Vector2d(i, j); 
 	}
-	//Vector subtraction
-	public Vector2d subtract(Vector2d a) {
-		double i = x - a.getX();
-		double j = y - a.getY();
+	
+	public Vector2d subtract(Vector2d a){// Vector subtraction
+		double i = X - a.getX();
+		double j = Y - a.getY();
 		return new Vector2d(i, j);	 
 	}
-	//Vector magnitude
-	public double magnitude() {
-		return Math.sqrt(Math.pow(x,2) + Math.pow(y,2));
+	
+	public double magnitude(){// Vector magnitude
+		return Math.sqrt(Math.pow(X,2) + Math.pow(Y,2));
 	}
-	//Vector cross product	
-	public double cross(Vector2d a) {
-			return x*a.getY() - a.getX()*y;			
+	
+	public double cross(Vector2d a){// Vector cross product	
+			return X*a.getY() - a.getX()*X;			
 	}
-	//Angle between Vector and positive X axis
-	public double angleX() {
-		return  Math.acos(x/this.magnitude());
+	
+	public double angleX(){// Angle (radians) between Vector and positive X axis
+		return  Math.acos(X/this.magnitude());
 	}
-	//Other Angle between Vector and negative X axis
-	public double angleOtherX() {
+	
+	public double angleOtherX(){// Other Angle (radians) between Vector and negative X axis
 		return Math.PI - this.angleX(); 
 	}
-	//Angle between Vector and positive Y axis
-	public double angleY() {
-		return  Math.acos(y/this.magnitude());
+	
+	public double angleY(){// Angle (radians) between Vector and positive Y axis
+		return  Math.acos(Y/this.magnitude());
 	}
-	//Other Angle between Vector and negative Y axis
-	public double angleOtherY() {
+	
+	public double angleOtherY(){// Other Angle (radians) between Vector and negative Y axis
 		return Math.PI - angleY(); 
 	}
-	//Turn Vector into a Unit vector
-	public Vector2d unitize()	{
-		if (x == 0 & y == 0) return this;
-		return new Vector2d(x/this.magnitude(), y/this.magnitude());			
+	
+	public Vector2d unitize(){// Turn Vector into a Unit vector
+		if (X == 0 & Y == 0) return this;
+		return new Vector2d(X/this.magnitude(), Y/this.magnitude());			
 	}
-	//Scalar multiplication of Vector
-	public Vector2d scalarMulti(double a) {
-		return new Vector2d(a*x, a*y);
+	
+	public Vector2d scalarMulti(double a){// Scalar multiplication of Vector
+		return new Vector2d(a*X, a*Y);
 	}
-	//Angle between two vectors
-	public double angleBetween(Vector2d a){
+	
+	public double angleBetween(Vector2d a){// Angle (radians) between two vectors
 		return Math.acos(this.dot(a)/(this.magnitude()*a.magnitude()));
 	}
-	//Create tangent vector object
-	public Vector2d tangent(){
-		return new Vector2d(-y, x);
+	
+	public Vector2d tangent(){// Create tangent vector object
+		return new Vector2d(-Y, X);
 	}
-	//Deep Copy = Make new vector object
-	public Vector2d deepCopy() {
-		return new Vector2d(x, y);
+	
+	public Vector2d deepCopy(){// Deep Copy = Make new vector object
+		return new Vector2d(X, Y);
 	}
-	//Keep as doubles but remove decimals and floor
-	public Vector2d integizerFloor() {
-		return new Vector2d(Math.floor(x), Math.floor(y));
+	
+	public Vector2d integizerFloor(){// Keep as doubles but remove decimals by flooring
+		return new Vector2d(Math.floor(X), Math.floor(Y));
 	}
-	//Keep as doubles but remove decimals and ceil
-	public Vector2d integizerCeil() {
-		return new Vector2d(Math.ceil(x), Math.ceil(y));
+	
+	public Vector2d integizerCeil(){// Keep as doubles but remove decimals by ceiling
+		return new Vector2d(Math.ceil(X), Math.ceil(Y));
 	}
-	//Returns new rotated vector object
-	public Vector2d rotate(double angle) {
-		double xPrime = x*Math.cos(angle) - y*Math.sin(angle);
-		double yPrime = x*Math.sin(angle) + y*Math.cos(angle);
+	
+	public Vector2d rotate(double angle){// Returns new rotated (radians) vector object
+		double xPrime = X*Math.cos(angle) - Y*Math.sin(angle);
+		double yPrime = X*Math.sin(angle) + Y*Math.cos(angle);
 		return new Vector2d(xPrime, yPrime);
 	}
-	//Cuts down the vector to inputted decimal point up to 4 decimal points
-	public void trim(int i){
+	
+	public void trim(int i){// Cuts down the vector to inputed decimal point up to 4 decimal points
 		
 		if (i < 1){
 			DecimalFormat df = new DecimalFormat("#.");
 			df.setRoundingMode(RoundingMode.DOWN);
-			x = Double.valueOf(df.format(x));
-			y = Double.valueOf(df.format(y));
+			X = Double.valueOf(df.format(X));
+			Y = Double.valueOf(df.format(Y));
 		} else if (i == 1){
 			DecimalFormat df = new DecimalFormat("#.#");
 			df.setRoundingMode(RoundingMode.DOWN);
-			x = Double.valueOf(df.format(x));
-			y = Double.valueOf(df.format(y));
+			X = Double.valueOf(df.format(X));
+			Y = Double.valueOf(df.format(Y));
 		} else if (i == 2){
 			DecimalFormat df = new DecimalFormat("#.##");
 			df.setRoundingMode(RoundingMode.DOWN);
-			x = Double.valueOf(df.format(x));
-			y = Double.valueOf(df.format(y));
+			X = Double.valueOf(df.format(X));
+			Y = Double.valueOf(df.format(Y));
 		} else if (i == 3){
 			DecimalFormat df = new DecimalFormat("#.###");
 			df.setRoundingMode(RoundingMode.DOWN);
-			x = Double.valueOf(df.format(x));
-			y = Double.valueOf(df.format(y));
+			X = Double.valueOf(df.format(X));
+			Y = Double.valueOf(df.format(Y));
 		} else {
 			DecimalFormat df = new DecimalFormat("#.####");
 			df.setRoundingMode(RoundingMode.DOWN);
-			x = Double.valueOf(df.format(x));
-			y = Double.valueOf(df.format(y));
+			X = Double.valueOf(df.format(X));
+			Y = Double.valueOf(df.format(Y));
 		}
 	}
 	
-	//Checks how close to being the same two different vectors are to given accuracy.
-	public boolean similar(Vector2d a, double accuracy){
+	public boolean similar(Vector2d a, double accuracy){// Checks magnitude of vector difference to given accuracy.
 		return this.subtract(a).magnitude() <= accuracy;
 	}
 }

@@ -37,20 +37,18 @@ TODO Conglomerate:
 		2)<X> Make it register up down left right movements.
 		3)<X> Make a speed up velocity and slow down velocity button.
 
-	LINE COLLISION:<X>
+	LINE COLLISION:
 		1)<X> Test out line collision against different geometries. 
 		2)<X> Make line collision return not just points but lines too (if whole side collides).
 		3)<X> Replace messy minLine to distance code with cleaner methods or variables?
+		4) Make the StorageTester display a line if square Vs. line collision yields a line
 	
-	LINE GEOM OBJECT DEFINITION:
-		1) Define a line object versus a Line segment in Geom 
+	LINE SEGMENT GEOM OBJECT DEFINITION:
+		1) Define a Line segment in Geom 
 			A) collisionGeom
 			B)<X> renderGeom
 			C) guesserThread
 	
-	LINE SEGMENT COLLISION:
-		1) Make a line segment collision detection, currently only LINE collision exists.	
-		
 	MULTITHREADING:
 		1)<X> Figure out how that even works and where it can be applied.
 		2)<X> Apply to Geom guessing,

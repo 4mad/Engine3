@@ -1,29 +1,29 @@
 // David Govorko, 09/28/2017
 package starter;
-
+// Debug for GeomGuesserThread()
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.concurrent.Callable;
 
-// Make a non-Debug version
 // Need to add an NGeom Guesser to determine which ID to set
-/*GuesserThreadDebug contains the following fields and methods:
- *  FIELDS:
- *  Thread t;
- *  String threadName;
- *  HashSet<Geom> collisionData
- *  Geom geomOG
- *  Geom Calculated
- *  int id (0 = Failed to identify, 1 = Line, 2 = Circle, 3 = Regular NGon, 4 Line Segment) list subject to change
+/*GuesserThreadDebug contains the following:
+ * FIELDS:
+ *  THREAD t;
+ *  STRING threadName;
+ *  HASHSET<GEOM> collisionData
+ *  GEOM geomOG
+ *  GEOM Calculated
+ *  INT id (0 = Failed to identify, 1 = Line, 2 = Circle, 3 = Regular NGon, 4 Line Segment) list subject to change
+ *   
+ * CONSTRUCTORS:
+ *  GuesserThreadDebug(String name, HashSet<Geom> collisionData, geomOG, ID): Default
+ *  GuesserThreadDebug(String name, HashSet<Geom> collisionData, geomOG): If id is not known    
  *     
- *  METHODS:
- *  GuesserThreadDebug(String name, HashSet<Geom> collisionData, geomOG, ID): Instancing
- *  GuesserThreadDebug(String name, HashSet<Geom> collisionData, geomOG): If Id is not known
- *  geussID() : Guesses the ID based on NGeom data
+ * METHODS:
+ *  Int geussID() : Guesses the ID based on NGeom data
  *  Geom kasaCircleGuessDebug() : as the name implies	
  *  Geom leastSquareLineGuessDebug() :  as the name implies
  *  Call(): Where the magic happens
- * 	  
  */
 public class GuesserThreadDebug implements Callable<Geom>{// Loosely Based on http://www.concretepage.com/java/java-callable-example
 	private String threadName;
@@ -32,7 +32,7 @@ public class GuesserThreadDebug implements Callable<Geom>{// Loosely Based on ht
 	private Geom calculated;
 	private int id; // Make a class that will guess the id#)
 	
-	public GuesserThreadDebug(String name, HashSet<Geom> CollisionPoints, Geom OriginalGeom, int NGeomIdNumber){ // Remove OriginalGeom for non-debug
+	public GuesserThreadDebug(String name, HashSet<Geom> CollisionPoints, Geom OriginalGeom, int NGeomIdNumber){// Remove OriginalGeom for non-debug
 		threadName = name;
 		System.out.println("Creating " +  threadName );
 		collisionData = CollisionPoints;
@@ -40,7 +40,7 @@ public class GuesserThreadDebug implements Callable<Geom>{// Loosely Based on ht
 		id = NGeomIdNumber;
 	}
 	
-	public GuesserThreadDebug(String name, HashSet<Geom> CollisionPoints, Geom OriginalGeom){ // This is in case one doesn't know what NGeom is being used
+	public GuesserThreadDebug(String name, HashSet<Geom> CollisionPoints, Geom OriginalGeom){// This is in case one doesn't know what NGeom is being used
 		threadName = name;
 		System.out.println("Creating " +  threadName );
 		collisionData = CollisionPoints;
@@ -51,7 +51,6 @@ public class GuesserThreadDebug implements Callable<Geom>{// Loosely Based on ht
 	public int guessID(){// Some crazy math needs to happen here to figure out the NGeom based on a bunch of points
 		return 0;
 	}
-	
 	
 	public Geom kasaCircleGuessDebug(){// Debug version that cheats by comparing the results to the actual Circle
 		System.out.println("kasaCircleGuess IS IN DEGUB MODE!");//Debug only
@@ -171,7 +170,7 @@ public class GuesserThreadDebug implements Callable<Geom>{// Loosely Based on ht
 		return lsLine;
 	}
 	
-	public Geom call() {
+	public Geom call() {// Debug version just has more strings for info 
 	      System.out.println("Running " +  threadName );// Debug only
 	      
 	      if (id == 0) {

@@ -1,28 +1,28 @@
 // David Govorko, 09/29/2017
 package starter;
-
+// A Callable thread that performs geometry guessing for circles and lines
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.concurrent.Callable;
 
-// Make a non-Debug version
 // Need to add an NGeom Guesser to determine which ID to set
-/*GuesserThread contains the following fields and methods:
- *  FIELDS:
- *  Thread t;
- *  String threadName;
- *  HashSet<Geom> collisionData
- *  Geom Calculated
- *  int id (0 = Failed to identify, 1 = Line, 2 = Circle, 3 = Regular NGon, 4 = Line Segment) list subject to change
- *     
- *  METHODS:
- *  GuesserThread(String name, HashSet<Geom> collisionData, ID): Instancing
+/*GuesserThread contains the following:
+ * FIELDS:
+ *  THREAD t;
+ *  STRING threadName;
+ *  HASHSET<GEOM> collisionData
+ *  GEOM Calculated
+ *  INT id (0 = Failed to identify, 1 = Line, 2 = Circle, 3 = Regular NGon, 4 = Line Segment) list subject to change
+ *   
+ * CONSTRUCTORS:     
+ *  GuesserThread(String name, HashSet<Geom> collisionData, ID): Default
  *  GuesserThread(String name, HashSet<Geom> collisionData): If Id is not known
- *  geussID() : Guesses the ID based on NGeom data
+ *     
+ * METHODS:
+ *  Int geussID() : Guesses the ID based on NGeom data
  *  Geom kasaCircleGuess() : as the name implies	
  *  Geom leastSquareLineGuess() :  as the name implies
  *  Call(): Where the magic happens
- * 	  
  */
 public class GuesserThread implements Callable<Geom>{// Loosely Based on http://www.concretepage.com/java/java-callable-example
 	private HashSet<Geom> collisionData;

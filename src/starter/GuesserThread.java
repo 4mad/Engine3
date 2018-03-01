@@ -8,17 +8,15 @@ import java.util.concurrent.Callable;
 // Need to add an NGeom Guesser to determine which ID to set
 /*GuesserThread contains the following:
  * FIELDS:
- *  THREAD t;
- *  STRING threadName;
  *  HASHSET<GEOM> collisionData
  *  GEOM Calculated
  *  INT id (0 = Failed to identify, 1 = Line, 2 = Circle, 3 = Regular NGon, 4 = Line Segment) list subject to change
  *   
  * CONSTRUCTORS:     
- *  GuesserThread(String name, HashSet<Geom> collisionData, ID): Default
- *  GuesserThread(String name, HashSet<Geom> collisionData): If Id is not known
+ *  GuesserThread(HashSet<Geom> collisionData, ID): Default
+ *  GuesserThread(HashSet<Geom> collisionData): If Id is not known
  *     
- * METHODS:
+ * METHODS: 
  *  Int geussID() : Guesses the ID based on NGeom data
  *  Geom kasaCircleGuess() : as the name implies	
  *  Geom leastSquareLineGuess() :  as the name implies
@@ -112,7 +110,7 @@ public class GuesserThread implements Callable<Geom>{// Loosely Based on http://
 		
 		temp = new Vector2d(sumX2, sumXY);
 		
-		lsLine.setGeometry(new NGeom(-100*temp.magnitude(), new Vector2d[] {temp}));
+		lsLine.setGeometry(new NGeom(-5000, new Vector2d[] {temp}));//-5000 since - = LINE and 5000 = max diag possible
 		
 		if (sumX2 == 0)// This in case the actual line is vertical so directionally x = 0 but y = almost infinity
 			lsLine.setGeometry(new NGeom(-123456780, new Vector2d[] {new Vector2d(0.0,1.0)}));

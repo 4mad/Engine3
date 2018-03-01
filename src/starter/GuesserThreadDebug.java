@@ -8,7 +8,6 @@ import java.util.concurrent.Callable;
 // Need to add an NGeom Guesser to determine which ID to set
 /*GuesserThreadDebug contains the following:
  * FIELDS:
- *  THREAD t;
  *  STRING threadName;
  *  HASHSET<GEOM> collisionData
  *  GEOM geomOG
@@ -101,7 +100,7 @@ public class GuesserThreadDebug implements Callable<Geom>{// Loosely Based on ht
 		System.out.println("D  0.5*(iterate*sumXY2-sumX*sumY2+iterate*sumX3-sumX*sumX2)  : " + D);//Debug only
 		System.out.println("E  0.5*(iterate*sumX2Y-sumX2*sumY+iterate*sumY3-sumY*sumY2)  : " + E);//Debug only
 
-		aM = (D*C-B*E)/(A*C-B*B);
+		aM = (D*C-B*E)/(A*C-B*B); 
 		bM = (A*E-B*D)/(A*C-B*B);
 
 		Iterator<Geom> iterator1 = this.collisionData.iterator();
@@ -118,11 +117,12 @@ public class GuesserThreadDebug implements Callable<Geom>{// Loosely Based on ht
 		kasaCircle.setOffset(new Vector2d(aM,bM));
 
 		// input  apache math library for covariance and see if it is faster.
+		System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 		return kasaCircle;
 	}
 	
 	public Geom leastSquareLineGuessDebug(){// Debug version that cheats by comparing the results to the actual Line
-		System.out.println("leastSquareLineGuess IS IN DEBUG MODE!");//Debug only
+		System.out.println("-----leastSquareLineGuess IS IN DEBUG MODE!-----");//Debug only
 
 		double mX = 0,mY = 0,sumX2 = 0,sumXY = 0;// hotmath.com/hotmath_help/topics/line-of-best-fit.html
 		Geom lsLine = new Geom();
@@ -158,7 +158,7 @@ public class GuesserThreadDebug implements Callable<Geom>{// Loosely Based on ht
 		
 		temp = new Vector2d(sumX2, sumXY);
 		
-		lsLine.setGeometry(new NGeom(-100*temp.magnitude(), new Vector2d[] {temp}));
+		lsLine.setGeometry(new NGeom(-5000, new Vector2d[] {temp}));//-5000 since - = LINE and 5000 = max diag possible
 		
 		if (sumX2 == 0)//This in case the actual line is vertical so directionally x = 0 but y = almost infinity
 			lsLine.setGeometry(new NGeom(-123456780, new Vector2d[] {new Vector2d(0.0,1.0)}));
@@ -167,11 +167,12 @@ public class GuesserThreadDebug implements Callable<Geom>{// Loosely Based on ht
 		System.out.println(lsLine.getOffset() + "   should be  " + geomOG.getOffset());//Debug only
 		System.out.println(lsLine.getGeometry().getVertexes()[0] + "    should be  " + geomOG.getGeometry().getVertexes()[0]);
 		
+		System.out.println("-------------------------------------------------------");
 		return lsLine;
 	}
 	
 	public Geom call() {// Debug version just has more strings for info 
-	      System.out.println("Running " +  threadName );// Debug only
+	      System.out.println("#####Running " +  threadName + " #####");// Debug only
 	      
 	      if (id == 0) {
 	    	  System.out.print("Sorry Geom Guessing has failed to identify the Geom");
@@ -188,7 +189,7 @@ public class GuesserThreadDebug implements Callable<Geom>{// Loosely Based on ht
 	    	  calculated = new Geom();
 	      }
 	      
-	      System.out.println("Thread " +  threadName + " exiting.");// Debug only
+	      System.out.println("#####Thread " +  threadName + " exiting.#####");// Debug only
 	      
 	      return calculated;    
 	   }

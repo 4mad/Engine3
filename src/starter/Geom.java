@@ -269,7 +269,7 @@ public class Geom {
 	}
 	
 	public Geom blindCollisionDebug(Geom B){// Debug Version
-		System.out.println("blindCollision IS IN DEBUG MODE!");
+		System.out.println("()()()()()blindCollision IS IN DEBUG MODE!()()()()()");
 		System.out.print("This is the Geom in Question: " + B);
 		
 		//  Square colliding into Circle
@@ -279,7 +279,7 @@ public class Geom {
 		else if ((B.getGeometry().getVertexes().length > 2) & (getGeometry().getVertexes().length == 1) & (getGeometry().getLDA() < 0)) {
 			return collisionRegPolyVsLineDebug(B);	
 		} else { //no collision detection code is made yet for this scenario
-			System.out.println("There is no Collision Detection code yet for this scenario");
+			System.out.println("()()()()()There is no Collision Detection code yet for this scenario()()()()()");
 			return new Geom();
 		}
 		
@@ -307,7 +307,7 @@ public class Geom {
 	}
 	
 	public Geom collisionRegPolyVsLineDebug(Geom RegPolygon){// Debug version
-		System.out.println("collsiionRegPolyVsLine IS IN DEBUG MODE!");
+		System.out.println("|||||collsiionRegPolyVsLine IS IN DEBUG MODE!|||||");
 		
 		double temp = Integer.MAX_VALUE;
 		Geom collideVert = new Geom();
@@ -328,7 +328,7 @@ public class Geom {
 				collideVert.setOffset(RegPolygon.getVectorPos(i));
 				temp = Math.abs(this.minDistPointToLine(RegPolygon.getVectorPos(i)));
 				System.out.println("Temp min Distance: " + temp);//Debug
-				System.out.println("Collision point position: " + collideVert.getOffset());//Debug
+				System.out.println("|||||Collision point position: " + collideVert.getOffset() + " |||||");//Debug
 				
 			}// If current <= temp
 		}//For loop
@@ -360,7 +360,7 @@ public class Geom {
 	}
 	
 	public Geom collisionSquareVsCircleDebug(Geom Square){// Debug Version
-		System.out.println("collisionSquareVsCircle IS IN DEBUG MODE!");// Debug only
+		System.out.println("00000collisionSquareVsCircle IS IN DEBUG MODE!00000");// Debug only
 		
 		Vector2d Dir = Offset.subtract(Square.getOffset());
 		System.out.println("Direction vector from square to circle center: " + Dir);// Debug only
@@ -389,7 +389,7 @@ public class Geom {
 		System.out.println("temp vector: " + temp);// Debug only
 		
 		collideVert = new Geom(0, 0, temp.rotate(Square.getAngleRad()).add(Square.getOffset()), new Vector2d(0,0), new NGeom());
-		System.out.println("Collision Vertex : " + collideVert);
+		System.out.println("00000Collision Vertex : " + collideVert + "00000");
 		
 		return collideVert;
 	}
@@ -442,7 +442,7 @@ public class Geom {
 	}
 	
 	public Geom collisionSquareVsCircleRefineDebug(Geom Square, Vector2d OverEstimatedPoint, int Accuracy){// Debug Version
-		System.out.println("collisionSquareVsCircleRefineDebug IS IN DEBUG MODE!");// Debug Only
+		System.out.println("~~~~~collisionSquareVsCircleRefineDebug IS IN DEBUG MODE!~~~~~");// Debug Only
 		System.out.println("With an accuracy of : " + Accuracy);// Debug Only
 		
 		Geom ReverseSquare = new Geom();
@@ -503,7 +503,7 @@ public class Geom {
 			System.out.println("Collision Vertex : " + collideVert);// Debug only
 		}
 		System.out.println("Final COLLISION POINT: " + collideVert);
-		System.out.println("End");
+		System.out.println("~~~~~End~~~~~");
 		
 		return collideVert;
 	}

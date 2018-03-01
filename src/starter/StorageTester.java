@@ -132,7 +132,7 @@ public class StorageTester {// A place to test the storage function of the stora
 			// Make the OpenGL context current
 			glfwMakeContextCurrent(window);
 			// Enable v-sync
-			glfwSwapInterval(0);// 0 = max, 1 = 60, 2 = 30, 3 = 20, ....
+			glfwSwapInterval(1);// 0 = max, 1 = 60, 2 = 30, 3 = 20, ....
 
 			// Make the window visible
 			glfwShowWindow(window);

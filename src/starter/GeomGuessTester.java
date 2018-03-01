@@ -428,8 +428,8 @@ public class GeomGuessTester {//A way to test the geometry guessing software and
 				if (slashKey == 0){// This part is only activated when the button is first pressed.
 					slashKey = 1;
 					if (debug) {// Debug
-						guesserThreadDebug = new GuesserThreadDebug("Thread: Circle", circleCollide, CIRCLE, 2);
-						System.out.println("Circle Data passed to GusserThreadDebug");
+						guesserThreadDebug = new GuesserThreadDebug("Thread: Circle", circleCollide, CIRCLE);
+						System.out.println("Circle Data passed to GuesserThreadDebug");
 						futureCircle = service.submit(guesserThreadDebug);// Maybe have a condition to check if future is in use atm?
 						futureCircleLive = true;
 						System.out.println("Initial Future Circle status check: " + futureCircle.isDone());
@@ -448,8 +448,8 @@ public class GeomGuessTester {//A way to test the geometry guessing software and
 				if (periodKey == 0){// This part is only activated when the button is first pressed.
 					periodKey = 1;
 					if (debug) {// Debug
-						guesserThreadDebug = new GuesserThreadDebug("Thread: Line", lineCollide, LINERIGHT, 1);
-						System.out.println("Line Data passed to GusserThreadDebug");
+						guesserThreadDebug = new GuesserThreadDebug("Thread: Line", lineCollide, LINERIGHT);
+						System.out.println("Line Data passed to GuesserThreadDebug");
 						futureLine = service.submit(guesserThreadDebug);// Maybe have a condition to check if future is in use atm?
 						futureLineLive = true;
 						System.out.println(futureLine.isDone());

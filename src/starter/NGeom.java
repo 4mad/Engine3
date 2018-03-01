@@ -6,7 +6,7 @@ import java.util.Arrays;
 /* The Following is the breakdown of how each geometry type is represented
  *  POINT: Vertexes = [0], LDA = 0
  *  LINE SEGMENT: Vertexes = [1], LDA = line segment length
- *  LINE: Vertexes = [1], LDA = -1*(very long length E.G. diagonal of window)
+ *  LINE: Vertexes = [1], LDA = -1*(2*diagonal of window)
  *  CIRCLE: Vertexes = [0], LDA = diameter
  *  REGULAR POLYGON: Vertexes = [#>2], LDA = calculated length 
  *  ARC/IREGULAR POLYGONS???

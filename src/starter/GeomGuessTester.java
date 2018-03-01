@@ -23,7 +23,7 @@ import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
 public class GeomGuessTester {//A way to test the geometry guessing software and collisions with the guessed geometry.
-		final Boolean debug = false;
+		final Boolean debug = true;
 	
 		//Window & Buffer dimensions
 		static final int worldDimX = 1301;

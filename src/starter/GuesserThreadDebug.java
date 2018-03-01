@@ -47,12 +47,25 @@ public class GuesserThreadDebug implements Callable<Geom>{// Loosely Based on ht
 		id = guessID();
 	}
 
-	public int guessID(){// Some crazy math needs to happen here to figure out the NGeom based on a bunch of points
-		return 0;
+	public int guessID(){//Able to discern between a line and a circle from discrete data points
+		System.out.println("ID Geusser IS IN DEGUB MODE!");//Debug only
+		int idCalc = 0; //Default unknown geom value
+		Geom tempGeom = this.kasaCircleGuessDebug();
+		System.out.println("*****GeomID asssumed to be UNKOWN*****");
+		
+		if(tempGeom.getGeometry().getLDA() >= 5000) {//Dif. between line & circle is line = circle with radius > 100,0000
+			idCalc = 1;
+			System.out.println("*****GeomID calculated to be a LINE: " + idCalc + " *****");
+		} else if (tempGeom.getGeometry().getLDA() < 5000){
+			idCalc = 2;
+			System.out.println("*****GeomID calculated to be a CIRCLE: " + idCalc + " *****");
+		}//REGPolygon guesser needed here
+				
+		return idCalc;
 	}
 	
 	public Geom kasaCircleGuessDebug(){// Debug version that cheats by comparing the results to the actual Circle
-		System.out.println("kasaCircleGuess IS IN DEGUB MODE!");//Debug only
+		System.out.println("+++++kasaCircleGuess IS IN DEGUB MODE!+++++");//Debug only
 		
 		double aM,bM,rK = 0,A,B,C,D,E;//http://people.cas.uab.edu/~mosya/cl/geomOGFitByKasa.cpp
 		double sumX2 = 0,sumX = 0, sumY2 = 0,sumY = 0,sumXY = 0,sumXY2 = 0,sumX3 = 0,sumX2Y = 0,sumY3 = 0;

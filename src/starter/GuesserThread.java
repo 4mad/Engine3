@@ -37,8 +37,17 @@ public class GuesserThread implements Callable<Geom>{// Loosely Based on http://
 		id = guessID();
 	}
 
-	public int guessID(){// Some crazy math needs to happen here to figure out the NGeom based on a bunch of points
-		return 0;
+	public int guessID(){//Able to discern between a line and a circle from discrete data points
+		int idCalc = 0; //Default unknown geom value
+		Geom tempGeom = this.kasaCircleGuess();
+		
+		if(tempGeom.getGeometry().getLDA() >= 5000) {//Dif. between line & circle is line = circle with radius > 100,0000
+			idCalc = 1;
+		} else if (tempGeom.getGeometry().getLDA() < 5000){//Circle assumed when radius < 100,000
+			idCalc = 2;
+		}//REGPolygon guesser needed here
+				
+		return idCalc;
 	}
 	
 	public Geom kasaCircleGuess(){// Guesses a circle's center and radius based on collision data

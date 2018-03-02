@@ -306,31 +306,32 @@ public class Geom {
 		return collideVert;
 	}
 	
-	public Geom collisionRegPolyVsLineDebug(Geom RegPolygon){// Debug version
+	public Geom collisionRegPolyVsLineDebug(Geom RegPolygon){// This projects the closest side/point of a polygon onto line
 		System.out.println("|||||collsiionRegPolyVsLine IS IN DEBUG MODE!|||||");
 		
-		double temp = Integer.MAX_VALUE;
-		Geom collideVert = new Geom();
+		double temp = Integer.MAX_VALUE;// Needed for minimum distance comparison
+		Geom collideVert = new Geom();// Collision point
 		
-		for (int i = 0; i < RegPolygon.getGeometry().getVertexes().length; i++) {//returns closest vertex to line
-			System.out.println("Min to vertex: " + this.minDistPointToLine(RegPolygon.getVectorPos(i)));//Debug
+		for (int i = 0; i < RegPolygon.getGeometry().getVertexes().length; i++) {// Iterates through every corner but only saves the closest corner/side
+			System.out.println("Min to vertex: " + this.minDistPointToLine(RegPolygon.getVectorPos(i)));// Debug
 			
-			if (Math.abs(this.minDistPointToLine(RegPolygon.getVectorPos(i))) <= temp) {
-				if (Math.abs(this.minDistPointToLine(RegPolygon.getVectorPos(i))) == temp){
-					System.out.println("Full Side of Polygon Collision Detected");//Debug
-					
+			if (Math.abs(this.minDistPointToLine(RegPolygon.getVectorPos(i))) <= temp) {// Checks if the corner to line distance is <= to previous data
+				if (Math.abs(this.minDistPointToLine(RegPolygon.getVectorPos(i))) == temp){// If the previous distance == current distance save the side
+					System.out.println("Full Side of Polygon Collision Detected");// Debug
+					// Below is the creation of a line segment of the collision line
 					collideVert.getGeometry().setVert(new Vector2d[]{collideVert.getOffset().subtract(RegPolygon.getVectorPos(i))});
 					collideVert.getGeometry().setLDA(collideVert.getGeometry().getVertexes()[0].magnitude());
-					System.out.println("Line LDA: " + collideVert.getGeometry().getLDA());//Debug
-					System.out.println("Line direction vertex: " + collideVert.getGeometry().getVertexes()[0]);//Debug
+					System.out.println("Temp min Distance: " + temp);//Debug
+					System.out.println("Line LDA: " + collideVert.getGeometry().getLDA());// Debug
+					System.out.println("|||||Line direction vertex: " + collideVert.getGeometry().getVertexes()[0]+ " |||||");// Debug
 					
-				}// If current == temp	
-				collideVert.setOffset(RegPolygon.getVectorPos(i));
-				temp = Math.abs(this.minDistPointToLine(RegPolygon.getVectorPos(i)));
+				}
+				collideVert.setOffset(RegPolygon.getVectorPos(i));// Corner is collision point
+				temp = Math.abs(this.minDistPointToLine(RegPolygon.getVectorPos(i)));// Sets this distance as the new collision point
 				System.out.println("Temp min Distance: " + temp);//Debug
 				System.out.println("|||||Collision point position: " + collideVert.getOffset() + " |||||");//Debug
 				
-			}// If current <= temp
+			}
 		}//For loop
 		return collideVert;
 	}
@@ -359,7 +360,7 @@ public class Geom {
 		return collideVert;
 	}
 	
-	public Geom collisionSquareVsCircleDebug(Geom Square){// Debug Version
+	public Geom collisionSquareVsCircleDebug(Geom Square){// Debug Version || For a detailed explanation of how it works see the refined Debug
 		System.out.println("00000collisionSquareVsCircle IS IN DEBUG MODE!00000");// Debug only
 		
 		Vector2d Dir = Offset.subtract(Square.getOffset());
@@ -394,7 +395,7 @@ public class Geom {
 		return collideVert;
 	}
 	
-	public Geom collisionSquareVsCircleRefine(Geom Square, Vector2d OverEstimatedPoint, int Accuracy){// Accuracy = # of increments
+	public Geom collisionSquareVsCircleRefine(Geom Square, int Accuracy){// Accuracy = # of increments
 		Geom ReverseSquare = new Geom();
 		ReverseSquare.setGeometry(Square.getGeometry());
 		Geom collideVert = new Geom();
@@ -441,64 +442,65 @@ public class Geom {
 		return collideVert;
 	}
 	
-	public Geom collisionSquareVsCircleRefineDebug(Geom Square, Vector2d OverEstimatedPoint, int Accuracy){// Debug Version
+	public Geom collisionSquareVsCircleRefineDebug(Geom Square, int Accuracy){// Recreate moments leading to collision in small steps
 		System.out.println("~~~~~collisionSquareVsCircleRefineDebug IS IN DEBUG MODE!~~~~~");// Debug Only
 		System.out.println("With an accuracy of : " + Accuracy);// Debug Only
 		
-		Geom ReverseSquare = new Geom();
-		ReverseSquare.setGeometry(Square.getGeometry());
-		Geom collideVert = new Geom();
-		collideVert.setOffset(new Vector2d(-1*this.getGeometry().getLDA(), -1*this.getGeometry().getLDA()));
-		double radiusComp = 0;
+		Geom ReverseSquare = new Geom();// Time iterating square
+		ReverseSquare.setGeometry(Square.getGeometry());// Copy current square state
+		Geom collideVert = new Geom();// Point that will collide
+		collideVert.setOffset(new Vector2d(-1*this.getGeometry().getLDA(), -1*this.getGeometry().getLDA()));// sets collision out of the system for error checking
+		double radiusComp = 0;// To be updated Radius value to check collideVert distance to
 		
-		System.out.println("Velocity Magnitude is: " + Square.getVelocity().magnitude());// Debug Only
+		System.out.println("Velocity Magnitude is: " + Square.getVelocity().magnitude());// Debug 
 		
-		ReverseSquare.setOffset(Square.getOffset().subtract(Square.getVelocity()));// Reset position to before collision.
-		ReverseSquare.setAngle(Square.getAngle() - Square.getDeltaAngle());
-		
-		ReverseSquare.setVelocity((Square.getVelocity()).scalarMulti(1.0/Accuracy));// Increase step by step accuracy
-		ReverseSquare.setDeltaAngle(Square.getDeltaAngle()/Accuracy);
+		ReverseSquare.setOffset(Square.getOffset().subtract(Square.getVelocity()));// Reset square's position to last position before collision.
+		ReverseSquare.setAngle(Square.getAngle() - Square.getDeltaAngle());// Reset square's rotation to last position before collision
+
+		ReverseSquare.setVelocity((Square.getVelocity()).scalarMulti(1.0/Accuracy));// Set square's velocity to move at lower speed (more accurate)
+		ReverseSquare.setDeltaAngle(Square.getDeltaAngle()/Accuracy);// Same as above but with angle 
 		System.out.println("Reverse Square Info : " + ReverseSquare);// Debug Only
 		System.out.println("Square Info : " + Square);// Debug Only
 		
-		for (int i = 0; i < Accuracy; i++){// Find the closest point to the circle by comparing radius to point's distance to circle.
-			ReverseSquare.update();
+		for (int i = 0; i < Accuracy; i++){// find the closest point to the circle by comparing radius to point's distance to circle. this point will be a point on the side or a corner
+			ReverseSquare.update();// Increments the square by 1 time step (1/accuracy)*(velocity && angle)
 			System.out.println("Start");
 			System.out.println("Reverse Square Info Begin Loop : " + ReverseSquare);// Debug Only
 			System.out.println("Loop Number : " + i);
 			
-			Vector2d Dir = this.getOffset().subtract(ReverseSquare.getOffset());
+			Vector2d Dir = this.getOffset().subtract(ReverseSquare.getOffset());// Direction vector from square to circle center
 			System.out.println("Direction vector from Reverse square to circle center: " + Dir);// Debug only
 			
-			double tempX;
-			double tempY; 
-			
-			double baX = Dir.getX()*Math.cos(-ReverseSquare.getAngleRad()) - Dir.getY()*Math.sin(-ReverseSquare.getAngleRad());
+			double tempX;// Holds ultimate collision point data
+			double tempY;// 
+			// baX,baY are the coordinates of the circle's center normalized to a coordinate system where the square's center is the origin and it is at a 0 angle --> ■
+			double baX = Dir.getX()*Math.cos(-ReverseSquare.getAngleRad()) - Dir.getY()*Math.sin(-ReverseSquare.getAngleRad());  
 			double baY = Dir.getX()*Math.sin(-ReverseSquare.getAngleRad()) + Dir.getY()*Math.cos(-ReverseSquare.getAngleRad());
 			System.out.println("baX : " + baX);// Debug only
 			System.out.println("baY : " + baY);// Debug only
 			
-			double halfLength = ReverseSquare.getGeometry().getSideLength()/2;
+			double halfLength = ReverseSquare.getGeometry().getSideLength()/2;// Half side length, for comparison with the baX,baY
 			System.out.println("Half of the side's length : " + halfLength);// Debug only
 			
-			if ( baX < - halfLength) tempX = -halfLength;
-			else if (baX >  halfLength) tempX = halfLength;
-			else tempX = baX;
+			if ( baX < - halfLength) tempX = -halfLength;// These lines determine if the normalized circle's center is
+			else if (baX >  halfLength) tempX = halfLength;// beyond the edges of the square or if it is inside the 
+			else tempX = baX; //								square's X plane
 
-			if (baY < - halfLength) tempY = - halfLength;
-			else if (baY > halfLength) tempY = halfLength;
-			else tempY = baY;
+			if (baY < - halfLength) tempY = - halfLength;// These lines determine if the normalized circle's center is
+			else if (baY > halfLength) tempY = halfLength;// beyond the edges of the square or if it is inside the
+			else tempY = baY;//								square's Y plane
 			
-			Vector2d temp = new Vector2d(tempX, tempY);
+			Vector2d temp = new Vector2d(tempX, tempY);// Collision point in square normalized plane
 			System.out.println("temp vector: " + temp);// Debug only
-			
+			// Distance from the collision point to the circle with the collision point adjusted to "real" coordinate system
 			radiusComp = (temp.rotate(ReverseSquare.getAngleRad()).add(ReverseSquare.getOffset())).dist(this.getOffset());
 			System.out.println("radius Comparison : " + radiusComp);// Debug only
 			
+			// Rotates the collision point back to real world coordinates
 			collideVert = new Geom(0, 0, temp.rotate(ReverseSquare.getAngleRad()).add(ReverseSquare.getOffset()), new Vector2d(0,0), new NGeom());
 			
-			if (radiusComp <= this.getGeometry().getLDA()/2)
-				i = Accuracy;
+			if (radiusComp <= this.getGeometry().getLDA()/2)// If the distance between the collision point is less than the radius
+				i = Accuracy;//									that means a collision occurred and the for loop is killed
 				
 			System.out.println("Collision Vertex : " + collideVert);// Debug only
 		}

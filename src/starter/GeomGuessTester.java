@@ -23,7 +23,7 @@ import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
 public class GeomGuessTester {//A way to test the geometry guessing software and collisions with the guessed geometry.
-		final Boolean debug = true;
+		final Boolean debug = false;
 	
 		//Window & Buffer dimensions
 		static final int worldDimX = 1301;
@@ -303,8 +303,7 @@ public class GeomGuessTester {//A way to test the geometry guessing software and
 			TRIANGLE.setOffset(new Vector2d(500,500));
 			*/
 		}
-		
-		
+			
 		public void geomMove(){ //Handles changes in Geom's positions/angles
 			SQUARE.update();
 		}
@@ -327,11 +326,11 @@ public class GeomGuessTester {//A way to test the geometry guessing software and
 				if (circleColide.getOffset().dist(CIRCLE.getOffset()) <= CIRCLE.getGeometry().getLDA()/2) {//Detection when distance to vertex is shorter than radius
 					if (debug){
 						System.out.println("Circle Square Collision Point: " + circleColide);//Debug
-						circleColide = CIRCLE.collisionSquareVsCircleRefineDebug(SQUARE, circleColide.getOffset(), 10);
+						circleColide = CIRCLE.collisionSquareVsCircleRefineDebug(SQUARE, 10);
 						System.out.println("Refined circle square Collision point : " + circleColide);
 					}
 					else 
-						circleColide = CIRCLE.collisionSquareVsCircleRefine(SQUARE, circleColide.getOffset(), 10);
+						circleColide = CIRCLE.collisionSquareVsCircleRefine(SQUARE, 10);
 					
 					SQUARE.setVelocity(SQUARE.getVelocity().scalarMulti(-1)); // Basic visual response to collision
 					SQUARE.setOffset(SQUARE.getOffset().add(SQUARE.getVelocity()));
@@ -339,8 +338,8 @@ public class GeomGuessTester {//A way to test the geometry guessing software and
 					circleCollide.add(circleColide);
 				}
 			} 
-			if (Math.abs(L0) < SQUARE.getGeometry().getLDA()/2 + SQUARE.getVelocity().magnitude()*10) {
-				Geom lineColide = LINETOP.collisionRegPolyVsLine(SQUARE);
+			if (Math.abs(L0) < SQUARE.getGeometry().getLDA()/2 + SQUARE.getVelocity().magnitude()*10) {//Top Line
+				Geom lineColide = LINETOP.collisionRegPolyVsLine(SQUARE);//Determines if a line or point collision is imminent
 				glColor3d(1,0.6,0.1);//orange
 				glPointSize(3);
 				if (debug)
@@ -355,21 +354,26 @@ public class GeomGuessTester {//A way to test the geometry guessing software and
 					SQUARE.setDeltaAngle(SQUARE.getDeltaAngle()*-1);
 				}
 			} 
-			if (Math.abs(L1) < SQUARE.getGeometry().getLDA()/2 + SQUARE.getVelocity().magnitude()*10) {
-				Geom lineColide = LINERIGHT.collisionRegPolyVsLine(SQUARE);
+			if (Math.abs(L1) < SQUARE.getGeometry().getLDA()/2 + SQUARE.getVelocity().magnitude()*10) {//Right line
+				Geom lineColide = LINERIGHT.collisionRegPolyVsLine(SQUARE);// Determines if a line or point collision is imminent
 				glColor3d(1,0.6,0.1);//orange
 				glPointSize(3);
-				if (debug)	
-					lineColide.blindRenderGeom(); //Debugging
+				if (debug)
+					lineColide.blindRenderGeom();// Debugging
 				
-				if (L1/LINERIGHT.minDistPointToLine(lineColide.getOffset()) <= 0) {//Detection when vertex is on the opposite side of the line that the center is on, allows for collision from both sides of line
-					if (debug)
-						System.out.println("Right Line Poly Collision Geometry : " + lineColide);//Debug
+				if (L1/LINERIGHT.minDistPointToLine(lineColide.getOffset()) <= 0) {// Detection when vertex is on the opposite side of the line that the center is on, allows for collision from both sides of line
+					if (debug) {
+						System.out.println("Right Line Poly Collision Geometry : " + lineColide);// Debug
+						lineColide = LINERIGHT.collisionRegPolyVsLineRefineDebug(SQUARE, 10);
+						System.out.println("Refined circle square Collision point : " + lineColide);
+					} else {
+						lineColide = LINERIGHT.collisionRegPolyVsLineRefine(SQUARE, 10);
+					}
 					
 					SQUARE.setVelocity(SQUARE.getVelocity().scalarMulti(-1)); // Basic visual response to collision
 					SQUARE.setOffset(SQUARE.getOffset().add(SQUARE.getVelocity()));
 					SQUARE.setDeltaAngle(SQUARE.getDeltaAngle()*-1);
-					lineColide.getOffset().trim(1);
+					// lineColide.getOffset().trim(1); // Hopefully refine collision can remove this error helper
 					if (debug)
 						System.out.println("Right Line Poly Collision Geometry after Trimming : " + lineColide);//Debug
 						

@@ -210,12 +210,12 @@ public class Geom {
 		GL11.glRotated(Angle, 0, 0, 1);
 		// Drawing the Line
 		GL11.glBegin(GL11.GL_LINES);
-		GL11.glVertex2d(Geometry.getVertexes()[0].getX()*Geometry.getLDA() , Geometry.getVertexes()[0].getY()*Geometry.getLDA()); //Starts at negative value
-		GL11.glVertex2d(-1*Geometry.getVertexes()[0].getX()*Geometry.getLDA() , -1*Geometry.getVertexes()[0].getY()*Geometry.getLDA());
+		GL11.glVertex2d(Geometry.getVertexes()[0].unitize().getX()*Geometry.getLDA() , Geometry.getVertexes()[0].unitize().getY()*Geometry.getLDA()); //Starts at negative value
+		GL11.glVertex2d(-1*Geometry.getVertexes()[0].unitize().getX()*Geometry.getLDA() , -1*Geometry.getVertexes()[0].unitize().getY()*Geometry.getLDA());
 		// End
 		GL11.glEnd();
 		//GL11.glLineWidth(1);// Really only used for debugging.
-		GL11.glPopMatrix();	
+		GL11.glPopMatrix();
 	}
 	
 	//TODO: Maybe change the circle's edge resolution?
@@ -506,6 +506,103 @@ public class Geom {
 		System.out.println("~~~~~End~~~~~");
 		
 		return collideVert;
+	}
+	
+	public Geom collisionRegPolyVsLineRefine(Geom RegPolygon, int Accuracy){// Slower (more accurate) step by step check for polygon crossing line
+		Geom ReverseRegPolygon= new Geom();// See Debug for detailed comments
+		ReverseRegPolygon.setGeometry(RegPolygon.getGeometry());
+		Geom collideGeom = new Geom();
+		collideGeom.setOffset(new Vector2d(-1*this.getGeometry().getLDA(), -1*this.getGeometry().getLDA()));
+		
+		double linePolyCenterDist;
+		double tempMin = Integer.MAX_VALUE;
+		
+		ReverseRegPolygon.setOffset(RegPolygon.getOffset().subtract(RegPolygon.getVelocity()));
+		ReverseRegPolygon.setAngle(RegPolygon.getAngle() - RegPolygon.getDeltaAngle());
+
+		ReverseRegPolygon.setVelocity((RegPolygon.getVelocity()).scalarMulti(1.0/Accuracy));
+		ReverseRegPolygon.setDeltaAngle(RegPolygon.getDeltaAngle()/Accuracy); 
+		
+		for (int i = 0; i < Accuracy; i++){
+			ReverseRegPolygon.update();
+			linePolyCenterDist = this.minDistPointToLine(ReverseRegPolygon.getOffset());
+			
+			for (int j = 0; j < ReverseRegPolygon.getGeometry().getVertexes().length; j++) {
+				
+				if (Math.abs(this.minDistPointToLine(ReverseRegPolygon.getVectorPos(j))) <= tempMin) {
+					if (Math.abs(this.minDistPointToLine(ReverseRegPolygon.getVectorPos(j))) == tempMin){
+						collideGeom.getGeometry().setVert(new Vector2d[]{collideGeom.getOffset().subtract(ReverseRegPolygon.getVectorPos(j))});
+						collideGeom.getGeometry().setLDA(collideGeom.getGeometry().getVertexes()[0].magnitude());
+					}
+					collideGeom.setOffset(ReverseRegPolygon.getVectorPos(j));
+					tempMin = Math.abs(this.minDistPointToLine(ReverseRegPolygon.getVectorPos(j)));
+				}
+			if (linePolyCenterDist/this.minDistPointToLine(collideGeom.getOffset()) <= 0) 
+				i = Accuracy;
+			}
+		}
+		return collideGeom;
+	}
+	
+	public Geom collisionRegPolyVsLineRefineDebug(Geom RegPolygon, int Accuracy){// Slower (more accurate) step by step check for polygon crossing line
+		System.out.println("=====collisionRegPolyVsLineRefineDebug IS IN DEBUG MODE!=====");// Debug Only
+		System.out.println("With an accuracy of : " + Accuracy);// Debug Only
+		
+		Geom ReverseRegPolygon= new Geom();// Time iterating polygon
+		ReverseRegPolygon.setGeometry(RegPolygon.getGeometry());// Copy current square state
+		Geom collideGeom = new Geom();// Point or polygon side that will collide
+		collideGeom.setOffset(new Vector2d(-1*this.getGeometry().getLDA(), -1*this.getGeometry().getLDA()));// Sets collision out of the system for error checking
+		
+		System.out.println("Velocity Magnitude is: " + RegPolygon.getVelocity().magnitude());// Debug 
+		
+		double linePolyCenterDist;// Distance from polygon center to line, distance to compare collision point to line distance
+		double tempMin = Integer.MAX_VALUE;// Needed for minimum distance comparison
+		
+		ReverseRegPolygon.setOffset(RegPolygon.getOffset().subtract(RegPolygon.getVelocity()));// Reset RegPolygon's position to last position before collision.
+		ReverseRegPolygon.setAngle(RegPolygon.getAngle() - RegPolygon.getDeltaAngle());// Reset square's rotation to last position before collision
+
+		ReverseRegPolygon.setVelocity((RegPolygon.getVelocity()).scalarMulti(1.0/Accuracy));// Set RegPolygon's velocity to move at lower speed (more accurate)
+		ReverseRegPolygon.setDeltaAngle(RegPolygon.getDeltaAngle()/Accuracy);// Same as above but with angle 
+		System.out.println("Reverse RegPolygon Info : " + ReverseRegPolygon);// Debug Only
+		System.out.println("RegPolygon Info : " + RegPolygon);// Debug Only
+		
+		for (int i = 0; i < Accuracy; i++){// find the closest point to the circle by comparing radius to point's distance to circle. this point will be a point on the side or a corner
+			ReverseRegPolygon.update();// Increments the square by 1 time step (1/accuracy)*(velocity && angle)
+			System.out.println("Start");
+			System.out.println("Reverse RegPolygon Info Begin Loop : " + ReverseRegPolygon);// Debug Only
+			System.out.println("Loop Number : " + i);
+			System.out.println("|||||collsiionRegPolyVsLine IS IN DEBUG MODE!|||||");
+			
+			linePolyCenterDist = this.minDistPointToLine(ReverseRegPolygon.getOffset());// Distance from RegPolygon center to line
+			
+			for (int j = 0; j < ReverseRegPolygon.getGeometry().getVertexes().length; j++) {// Iterates through every corner but only saves the closest corner/side
+				System.out.println("Min to vertex: " + this.minDistPointToLine(ReverseRegPolygon.getVectorPos(j)));// Debug
+				
+				if (Math.abs(this.minDistPointToLine(ReverseRegPolygon.getVectorPos(j))) <= tempMin) {// Checks if the corner to line distance is <= to previous data
+					if (Math.abs(this.minDistPointToLine(ReverseRegPolygon.getVectorPos(j))) == tempMin){// If the previous distance == current distance save the side
+						System.out.println("Full Side of RegPolygon Collision Detected");// Debug
+						// Below is the creation of a line segment of the collision line
+						collideGeom.getGeometry().setVert(new Vector2d[]{collideGeom.getOffset().subtract(ReverseRegPolygon.getVectorPos(j))});
+						collideGeom.getGeometry().setLDA(collideGeom.getGeometry().getVertexes()[0].magnitude());
+						System.out.println("Temp min Distance: " + tempMin);//Debug
+						System.out.println("Line LDA: " + collideGeom.getGeometry().getLDA());// Debug
+						System.out.println("|||||Line direction vertex: " + collideGeom.getGeometry().getVertexes()[0]+ " |||||");// Debug
+						
+					}
+					collideGeom.setOffset(ReverseRegPolygon.getVectorPos(j));// Corner is collision point
+					tempMin = Math.abs(this.minDistPointToLine(ReverseRegPolygon.getVectorPos(j)));// Sets this distance as the new collision point
+					System.out.println("Temp min Distance: " + tempMin);//Debug
+					System.out.println("|||||Collision point position: " + collideGeom.getOffset() + " |||||");//Debug
+				}
+			if (linePolyCenterDist/this.minDistPointToLine(collideGeom.getOffset()) <= 0)/// Detection when vertex is on the opposite side of the line that the center is on, 
+				i = Accuracy;//allows for collision from both sides of line which that means a collision occurred and the FOR loop is killed
+				
+			System.out.println("Collision Vertex : " + collideGeom);// Debug only
+			}
+		System.out.println("Final COLLISION Geom: " + collideGeom);
+		System.out.println("~~~~~End~~~~~");
+		}
+		return collideGeom;
 	}
 	
 }

@@ -14,22 +14,23 @@ TODO Conglomerate:
 		3) Make a temporary collision points hash that will be stored until it's parent geometry has been guessed
 	
 	DEBUG:
-		1) Implement debug across all used classes.
+		1) <X> Implement debug across all used classes.
 	
 	Geom:
 		1)<X> Make non "blind" collision methods for each specific case.
 		2)<X> Make non "blind" renderGeom methods for each specific case.
-		3) Make a "blind" geomGuesser method that works to identify which geometry the collision points resembles the most.
+		3)<X> Make a "blind" geomGuesser method that works to identify which geometry the collision points resembles the most.
 	
 	GEOMETRY GUESSING:
 		1) Make geometry guessing algorithms work with 4 collision points
 			A)<X> Circle
 			B)<X> Line
 			C) Line Segment
+			D) RegPolygon
 		2) Increase accuracy to 0.1% with 3 collisions
 	
 	LINE GEOM GEUSSER:
-		1)<X> Currently cuts all value down to integers, make it more accurate.
+		1)<X> Now points are more accurate so guessing is more accurate
 		2) Deals with vertical lines by doing a == 0 which is way too precise, make it more variable (function of inaccuracy?)
 	
 	INPUT:<X>
@@ -52,9 +53,8 @@ TODO Conglomerate:
 	MULTITHREADING:
 		1)<X> Figure out how that even works and where it can be applied.
 		2)<X> Apply to Geom guessing,
-		3)<X> collision point? --> Time critical, maybe collision point refining?
-		4) collision point Refining?
-		5) sorting?
+		3) collision point? --> Time critical, maybe collision point refining?
+		4) sorting?
 		
 	VECTOR2D:
-		1)<X> Test similar method.
+		1)<X> Test similar() method.

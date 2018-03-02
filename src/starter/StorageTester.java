@@ -285,11 +285,11 @@ public class StorageTester {// A place to test the storage function of the stora
 				if (circleColide.getOffset().dist(CIRCLE.getOffset()) <= CIRCLE.getGeometry().getLDA()/2) {// Detection when distance to vertex is shorter than radius
 					if (debug){
 						System.out.println("Circle Square Collision Point: " + circleColide);//Debug
-						circleColide = CIRCLE.collisionSquareVsCircleRefineDebug(SQUARE, circleColide.getOffset(), 10);
+						circleColide = CIRCLE.collisionSquareVsCircleRefineDebug(SQUARE, 10);
 						System.out.println("Refined circle square Collision point : " + circleColide);
 					}
 					else 
-						circleColide = CIRCLE.collisionSquareVsCircleRefine(SQUARE, circleColide.getOffset(), 10);
+						circleColide = CIRCLE.collisionSquareVsCircleRefine(SQUARE, 10);
 					
 					SQUARE.setVelocity(SQUARE.getVelocity().scalarMulti(-1)); // Basic visual response to collision
 					SQUARE.setOffset(SQUARE.getOffset().add(SQUARE.getVelocity()));

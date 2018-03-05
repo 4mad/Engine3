@@ -27,7 +27,7 @@ TODO Conglomerate:
 			B)<X> Line
 			C) Line Segment
 			D) RegPolygon
-		2) Increase accuracy to 0.1% with 3 collisions
+		2) Increase accuracy to 0.1% with 3 collisions (based on discrete math and collision accuracy)
 	
 	LINE GEOM GEUSSER:
 		1)<X> Now points are more accurate so guessing is more accurate

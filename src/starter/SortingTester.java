@@ -127,8 +127,6 @@ public class SortingTester {
 			throw new RuntimeException("Failed to create the GLFW window");
 		
 		// Put the following in a collision sorting object
-		
-		
 		circleColliders.add(0,circleCollide);// Circle Collision List 0
 		lineColliders.add(0,topLineCollide);// Line Collision list 0
 		lineColliders.add(1,rightLineCollide);// Line Collision list 1
@@ -215,45 +213,7 @@ public class SortingTester {
 			
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 			
-			glPointSize(1);//regular point size
-			for (int i = 0; i < 4; i++) {// Renders Points, Lines, Circles, and Squares
-				switch(i) {
-					case 0: Geom throwAwayPointRenderer = new Geom();
-							glPointSize(3);// Change it so its a blind render between a line/point
-							for (int j = 0;j < 4; j++) {
-								Iterator<Geom> iterator0 = CC.get(1).get(j).iterator();// Line Detection collision
-								while (iterator0.hasNext()) {// Renders all the collision points on the "computer vision" screen
-									throwAwayPointRenderer.setOffset(iterator0.next().getOffset().add(new Vector2d(localDimX, 0)));
-									throwAwayPointRenderer.renderPoint();
-								}
-							}
-							
-							glColor3d(1,1,1);// white
-							glPointSize(2);
-							Iterator<Geom> iterator2 = CC.get(2).get(0).iterator();// Circle detection collision
-							while (iterator2.hasNext()) {//Renders all the collision points on the "computer vision" screen
-								throwAwayPointRenderer.setOffset(iterator2.next().getOffset().add(new Vector2d(localDimX, 0)));
-								throwAwayPointRenderer.renderPoint();
-							}
-							break;
-					case 1: for (int j = 0; j < 4; j++) {
-								glColor3d(0.8,0.5,0.7);//gold
-								wG.get(1).get(j).renderLine();// Side Lines
-								glColor3d(1,0.6,0.4);//salmon
-								cG.get(1).get(j).blindRenderGeom();// Computer Lines
-							}
-							break;
-					case 2: glColor3d(0,0,1);//blue
-							wG.get(2).get(0).renderCircle();// Circle
-							glColor3d(1,0.6,0.4);//salmon
-							cG.get(2).get(0).renderCircle();// Computer Circle
-							break;
-					case 3: glColor3d(0.9,0.5,0.9);//ugly pale purple
-							wG.get(3).get(0).renderPolygon();// Square
-							break;
-				}
-			}
-			
+			renderEverything();// Renders everything			
 			keyInput();// should it be here or after geom Move but before concurrencyHandlingDebug()
 			geomMove();// moves the Geoms
 			collision();// handles collision parameters
@@ -281,6 +241,48 @@ public class SortingTester {
 		    }
 			
 		} //While loop
+		
+	}
+	
+	public void renderEverything(){
+		glPointSize(1);//regular point size
+		for (int i = 0; i < 4; i++) {// Renders Points, Lines, Circles, and Squares
+			switch(i) {
+				case 0: Geom throwAwayPointRenderer = new Geom();
+						glPointSize(3);// Change it so its a blind render between a line/point
+						for (int j = 0;j < 4; j++) {
+							Iterator<Geom> iterator0 = CC.get(1).get(j).iterator();// Line Detection collision
+							while (iterator0.hasNext()) {// Renders all the collision points on the "computer vision" screen
+								throwAwayPointRenderer.setOffset(iterator0.next().getOffset().add(new Vector2d(localDimX, 0)));
+								throwAwayPointRenderer.renderPoint();
+							}
+						}
+						
+						glColor3d(1,1,1);// white
+						glPointSize(2);
+						Iterator<Geom> iterator2 = CC.get(2).get(0).iterator();// Circle detection collision
+						while (iterator2.hasNext()) {//Renders all the collision points on the "computer vision" screen
+							throwAwayPointRenderer.setOffset(iterator2.next().getOffset().add(new Vector2d(localDimX, 0)));
+							throwAwayPointRenderer.renderPoint();
+						}
+						break;
+				case 1: for (int j = 0; j < 4; j++) {
+							glColor3d(0.8,0.5,0.7);//gold
+							wG.get(1).get(j).renderLine();// Side Lines
+							glColor3d(1,0.6,0.4);//salmon
+							cG.get(1).get(j).blindRenderGeom();// Computer Lines
+						}
+						break;
+				case 2: glColor3d(0,0,1);//blue
+						wG.get(2).get(0).renderCircle();// Circle
+						glColor3d(1,0.6,0.4);//salmon
+						cG.get(2).get(0).renderCircle();// Computer Circle
+						break;
+				case 3: glColor3d(0.9,0.5,0.9);//ugly pale purple
+						wG.get(3).get(0).renderPolygon();// Square
+						break;
+			}
+		}
 		
 	}
 	

@@ -25,18 +25,18 @@ import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.MemoryUtil.*;
 //A test bed for identifying geometries in collision data and sorting them into their respective groups
 public class SortingTester {
-	final Boolean debug = true;
+	final Boolean debug = false;
 	
 	// Window & Buffer dimensions
 	static final int localDimX = 650;
 	static final int worldDimX = localDimX*2 +1;
 	static final int worldDimY = 650;
 	
-	
 	// World Builder
-	//? Make a static one for world vision and a dynamic one for computer vision that can update
-	public WorldBuilder worldBuilt = new WorldBuilder(worldDimX, worldDimY, localDimX);
-	public List<List<Geom>> wG = worldBuilt.getworldGeom();
+	public WorldBuilder realWorldBuilt = new WorldBuilder(localDimX, worldDimY);
+	public WorldBuilder computerWorldBuilt = new WorldBuilder(worldDimX, worldDimY, localDimX);
+	public List<List<Geom>> wG = realWorldBuilt.getWorldGeometries();
+	public List<List<Geom>> cG = computerWorldBuilt.getWorldGeometries();
 	
 	// Collision detection set
 	// This should become its own object that can add, subtract, and sort these data sets
@@ -49,7 +49,7 @@ public class SortingTester {
 	// Collision detection lists
 	public List <HashSet<Geom>> lineColliders = new ArrayList<HashSet<Geom>>();// Per line list
 	public List <HashSet<Geom>> circleColliders = new ArrayList<HashSet<Geom>>();// Per circle list
-	public List <List<HashSet<Geom>>> CC = new ArrayList<List<HashSet<Geom>>>(4);// Collision collection
+	public List <List<HashSet<Geom>>> CC = new ArrayList<List<HashSet<Geom>>>();// Collision collection
 	
 	// GuesserThread creation
 	public GuesserThreadDebug guesserThreadDebug;
@@ -218,12 +218,13 @@ public class SortingTester {
 			glPointSize(1);//regular point size
 			for (int i = 0; i < 4; i++) {// Renders Points, Lines, Circles, and Squares
 				switch(i) {
-					case 0: glPointSize(3);// Change it so its a blind render between a line/point
+					case 0: Geom throwAwayPointRenderer = new Geom();
+							glPointSize(3);// Change it so its a blind render between a line/point
 							for (int j = 0;j < 4; j++) {
 								Iterator<Geom> iterator0 = CC.get(1).get(j).iterator();// Line Detection collision
 								while (iterator0.hasNext()) {// Renders all the collision points on the "computer vision" screen
-									wG.get(0).get(0).setOffset(iterator0.next().getOffset().add(new Vector2d(localDimX, 0)));
-									wG.get(0).get(0).renderPoint();
+									throwAwayPointRenderer.setOffset(iterator0.next().getOffset().add(new Vector2d(localDimX, 0)));
+									throwAwayPointRenderer.renderPoint();
 								}
 							}
 							
@@ -231,21 +232,21 @@ public class SortingTester {
 							glPointSize(2);
 							Iterator<Geom> iterator2 = CC.get(2).get(0).iterator();// Circle detection collision
 							while (iterator2.hasNext()) {//Renders all the collision points on the "computer vision" screen
-								wG.get(0).get(0).setOffset(iterator2.next().getOffset().add(new Vector2d(localDimX, 0)));
-								wG.get(0).get(0).renderPoint();
+								throwAwayPointRenderer.setOffset(iterator2.next().getOffset().add(new Vector2d(localDimX, 0)));
+								throwAwayPointRenderer.renderPoint();
 							}
 							break;
 					case 1: for (int j = 0; j < 4; j++) {
 								glColor3d(0.8,0.5,0.7);//gold
 								wG.get(1).get(j).renderLine();// Side Lines
 								glColor3d(1,0.6,0.4);//salmon
-								wG.get(1).get(4 + j).blindRenderGeom();// Temp Lines
+								cG.get(1).get(j).blindRenderGeom();// Computer Lines
 							}
 							break;
 					case 2: glColor3d(0,0,1);//blue
 							wG.get(2).get(0).renderCircle();// Circle
 							glColor3d(1,0.6,0.4);//salmon
-							wG.get(2).get(1).renderCircle();// Temp Circle
+							cG.get(2).get(0).renderCircle();// Computer Circle
 							break;
 					case 3: glColor3d(0.9,0.5,0.9);//ugly pale purple
 							wG.get(3).get(0).renderPolygon();// Square
@@ -394,7 +395,7 @@ public class SortingTester {
 					fB.get(2).set(0, true);
 				}
 			}
-			wG.get(2).get(1).renderCircle();
+			cG.get(2).get(0).renderCircle();
 		} 
 		//Updates least square line guesser based on which line you want (1 = top, 2 = right, 3 = bottom, 4 = left)
 		for (int i = 0; i < 4; i++) { 
@@ -410,12 +411,12 @@ public class SortingTester {
 						
 						System.out.println("LINE THIS IS PROOF THAT THE GUESSER THREAD IS RUNNNNING ON ANOTHER THREAD AND THE MAIN THREAD DOES NOT CARE AND MOVES ON!");
 					} else {// Activates the guessing thread here, data is collected in concurrency() method
-						guesserThread = new GuesserThread( CC.get(1).get(i), 1);
+						guesserThread = new GuesserThread(CC.get(1).get(i), 1);
 						fG.get(1).set(i, service.submit(guesserThread));// Maybe have a condition to check if future is in use atm?
 						fB.get(1).set(i, true);
 					}
 				}
-				wG.get(1).get(4 + i).blindRenderGeom();
+				cG.get(1).get(i).blindRenderGeom();
 			} 
 		}
 		if (glfwGetKey(window, GLFW_KEY_LEFT_BRACKET) == 1){//Decrease Speed
@@ -433,8 +434,8 @@ public class SortingTester {
 		if (fB.get(2).get(0) && fG.get(2).get(0).isDone()){// This is to check if the futureCircle has content and is running.
 			System.out.println("&&&&FutureCircle is Done?: " + fG.get(2).get(0).isDone() + " &&&&&");
 			try {
-				wG.get(2).set(1, fG.get(2).get(0).get()); 
-				wG.get(2).get(1).setOffset(wG.get(2).get(1).getOffset().add(new Vector2d(localDimX, 0)));
+				cG.get(2).set(0, fG.get(2).get(0).get()); 
+				cG.get(2).get(0).setOffset(cG.get(2).get(0).getOffset().add(new Vector2d(localDimX, 0)));
 			} catch (InterruptedException e) {
 				System.out.println("Circle Interrupted Excpetion");
 				e.printStackTrace();
@@ -448,8 +449,8 @@ public class SortingTester {
 			if (fB.get(1).get(i) && fG.get(1).get(i).isDone()){// This is to check if the futureLine has content and is running.
 				System.out.println("&&&&FutureLine is Done?: " + fG.get(1).get(i).isDone() + " &&&&&");
 				try {
-					wG.get(1).set(4 + i, fG.get(1).get(i).get());
-					wG.get(1).get(4 + i).setOffset(wG.get(1).get(4 + i).getOffset().add(new Vector2d(localDimX, 0)));
+					cG.get(1).set(i, fG.get(1).get(i).get());
+					cG.get(1).get(i).setOffset(cG.get(1).get(i).getOffset().add(new Vector2d(localDimX, 0)));
 				} catch (InterruptedException e) {
 					System.out.println("Line Interrupted Excpetion");
 					e.printStackTrace();
@@ -465,8 +466,8 @@ public class SortingTester {
 	public void concurrencyHandling(){// Handles receiving data from callback threads.
 		if (fB.get(2).get(0) && fG.get(2).get(0).isDone()){// This is to check if the futureCircle has content and is running.
 			try {
-				wG.get(2).set(1, fG.get(2).get(0).get()); 
-				wG.get(2).get(1).setOffset(wG.get(2).get(1).getOffset().add(new Vector2d(localDimX, 0)));
+				cG.get(2).set(0, fG.get(2).get(0).get()); 
+				cG.get(2).get(0).setOffset(cG.get(2).get(0).getOffset().add(new Vector2d(localDimX, 0)));
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			} catch (ExecutionException e) {
@@ -477,8 +478,8 @@ public class SortingTester {
 		for (int i = 0; i < 4; i++) {
 			if (fB.get(1).get(i) && fG.get(1).get(i).isDone()){// This is to check if the futureLine has content and is running.
 				try {
-					wG.get(1).set(4 + i, fG.get(1).get(i).get());
-					wG.get(1).get(4 + i).setOffset(wG.get(1).get(4 + i).getOffset().add(new Vector2d(localDimX, 0)));
+					cG.get(1).set(i, fG.get(1).get(i).get());
+					cG.get(1).get(i).setOffset(cG.get(1).get(i).getOffset().add(new Vector2d(localDimX, 0)));
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				} catch (ExecutionException e) {

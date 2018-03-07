@@ -25,7 +25,7 @@ import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.MemoryUtil.*;
 //A test bed for identifying geometries in collision data and sorting them into their respective groups
 public class SortingTester {
-	final Boolean debug = false;
+	final Boolean debug = true;
 	
 	// Window & Buffer dimensions
 	static final int localDimX = 650;
@@ -38,18 +38,8 @@ public class SortingTester {
 	public List<List<Geom>> wG = realWorldBuilt.getWorldGeometries();
 	public List<List<Geom>> cG = computerWorldBuilt.getWorldGeometries();
 	
-	// Collision detection set
-	// This should become its own object that can add, subtract, and sort these data sets
-	public HashSet<Geom> circleCollide = new HashSet<Geom>();// Contains points of circle collision
-	public HashSet<Geom> topLineCollide = new HashSet<Geom>();// Contains points of Top line collision
-	public HashSet<Geom> rightLineCollide = new HashSet<Geom>();// Contains points of Right line collision
-	public HashSet<Geom> bottomLineCollide = new HashSet<Geom>();// Contains points of Bottom line collision
-	public HashSet<Geom> leftLineCollide = new HashSet<Geom>();// Contains points of Left line collision
-	
-	// Collision detection lists
-	public List <HashSet<Geom>> lineColliders = new ArrayList<HashSet<Geom>>();// Per line list
-	public List <HashSet<Geom>> circleColliders = new ArrayList<HashSet<Geom>>();// Per circle list
-	public List <List<HashSet<Geom>>> CC = new ArrayList<List<HashSet<Geom>>>();// Collision collection
+	public CollisionProcessor CollisionCollector = new CollisionProcessor(debug);
+	public List<List<HashSet<Geom>>> CC = CollisionCollector.getCollisionGlobal();
 	
 	// GuesserThread creation
 	public GuesserThreadDebug guesserThreadDebug;
@@ -125,17 +115,6 @@ public class SortingTester {
 		
 		if ( window == NULL )
 			throw new RuntimeException("Failed to create the GLFW window");
-		
-		// Put the following in a collision sorting object
-		circleColliders.add(0,circleCollide);// Circle Collision List 0
-		lineColliders.add(0,topLineCollide);// Line Collision list 0
-		lineColliders.add(1,rightLineCollide);// Line Collision list 1
-		lineColliders.add(2,bottomLineCollide);// Line Collision list 2
-		lineColliders.add(3,leftLineCollide);// Line Collision list 3
-		
-		CC.add(0,lineColliders);// Replace with a point Geom List
-		CC.add(1,lineColliders);// Collision Geom List 1
-		CC.add(2, circleColliders);// Collision Geom List 2
 		
 		// Put the following in a future sorting object
 		futureBoolLine.add(0,futureLineTopLive);
@@ -328,7 +307,7 @@ public class SortingTester {
 									wG.get(3).get(0).setDeltaAngle(wG.get(3).get(0).getDeltaAngle()*-1);
 
 									if (debug)
-										System.out.println("Right Line Poly Collision Geometry after Trimming : " + lineColide);//Debug
+										System.out.println("Right Line Poly Collision Geometry after Refinement : " + lineColide);//Debug
 										
 									CC.get(1).get(j).add(lineColide);
 								}

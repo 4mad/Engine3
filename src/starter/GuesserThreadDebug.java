@@ -173,8 +173,8 @@ public class GuesserThreadDebug implements Callable<Geom>{// Loosely Based on ht
 		
 		lsLine.setGeometry(new NGeom(-5000, new Vector2d[] {temp}));//-5000 since - = LINE and 5000 = max diag possible
 		
-		if (sumX2 == 0)//This in case the actual line is vertical so directionally x = 0 but y = almost infinity
-			lsLine.setGeometry(new NGeom(-123456780, new Vector2d[] {new Vector2d(0.0,1.0)}));
+		if (sumX2 <= 0.01)//This in case the actual line is vertical so directionally x = 0 but y = almost infinity
+			lsLine.setGeometry(new NGeom(-5000, new Vector2d[] {new Vector2d(0.0,1.0)}));
 		
 		System.out.println(lsLine.getGeometry().getLDA() + "   should be  " + geomOG.getGeometry().getLDA());//Debug only
 		System.out.println(lsLine.getOffset() + "   should be  " + geomOG.getOffset());//Debug only

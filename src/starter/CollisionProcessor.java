@@ -26,35 +26,92 @@ public class CollisionProcessor {
 		CollisionGlobal.add(regPolyColliders);
 	}
 	
-	public CollisionProcessor(boolean debug) {// Debug constructor with debug data
-		CollisionGlobal = new ArrayList<List<HashSet<Geom>>>();
-		List <HashSet<Geom>> pointColliders = new ArrayList<HashSet<Geom>>();
-		List <HashSet<Geom>> lineColliders = new ArrayList<HashSet<Geom>>();
-		List <HashSet<Geom>> circleColliders = new ArrayList<HashSet<Geom>>();
-		List <HashSet<Geom>> regPolyColliders = new ArrayList<HashSet<Geom>>();
-		// Collision detection geom lists
-		CollisionGlobal.add(pointColliders);
-		CollisionGlobal.add(lineColliders);
-		CollisionGlobal.add(circleColliders);
-		CollisionGlobal.add(regPolyColliders);
-		if (debug) {
-			// Collision detection HashSets
-			//HashSet<Geom> circleCollide = new HashSet<Geom>();// Contains points of circle collision
-			HashSet<Geom> topLineCollide = new HashSet<Geom>();// Contains points of Top line collision
-			HashSet<Geom> rightLineCollide = new HashSet<Geom>();// Contains points of Right line collision
-			HashSet<Geom> bottomLineCollide = new HashSet<Geom>();// Contains points of Bottom line collision
-			HashSet<Geom> leftLineCollide = new HashSet<Geom>();// Contains points of Left line collision
-			// HashSets put into their respective geoms
-			CollisionGlobal.get(1).add(topLineCollide);// Line 0
-			CollisionGlobal.get(1).add(rightLineCollide);// Line 1
-			CollisionGlobal.get(1).add(bottomLineCollide);// Line 2
-			CollisionGlobal.get(1).add(leftLineCollide);// Line 3
-			//CollisionGlobal.get(2).add(circleCollide);// Circle 0
+	// Compares collision distance to all points in store and then adds it to respective HashSet or makes a new HashSet altogether
+	public void collisionDistanceCompareDebug(Geom collide, double minSpread) { 
+		System.out.println("{{{{{CollisionDistanceCompareDebug Started}}}}}");
+		int listLevel = 0;// Debug only
+		int hashLevel = 0;// Debug only
+		int listMem = 0;
+		int hashMem = 0;
+		boolean added = false;
+		for (List<HashSet<Geom>> listOfGeoms: this.CollisionGlobal) {
+			System.out.println("List Level: " + listLevel);
+			for (HashSet<Geom> listOfHashSets: listOfGeoms) {
+				System.out.println("Hash Level: " + hashLevel);	
+				for (Geom collideWith: listOfHashSets) {
+					if (collideWith.getOffset().dist(collide.getOffset()) <= minSpread) {
+						System.out.println(collideWith.getOffset() + "  at a distance of " + collideWith.getOffset().dist(collide.getOffset()));
+						System.out.println("Geom added to HashSet # " + hashLevel + " of Geom type " + listLevel + " . Geom is as follows. " + collide);
+						
+						added = true;
+						listMem = listLevel;
+						hashMem = hashLevel;
+					}
+				}// Individual Geoms
+				hashLevel++;
+			}// List of Hashes
+			hashLevel = 0;
+			listLevel++;
+		}// Data Walkthrough
+		
+		if (added) {
+			this.getCollisionGlobal().get(listMem).get(hashMem).add(collide);
+		}else {
+			HashSet<Geom> addTemp = new HashSet<Geom>();
+			addTemp.add(collide);
+			this.getCollisionGlobal().get(0).add(addTemp);
+			System.out.println("HashSet added to Geom type 0. Geom is as follows. " + collide);
 		}
 	}
-
-	public void collisionDistanceCompareDebug() {
+	
+	// Compares collision distance to all points in store and then adds it to respective HashSet or makes a new HashSet altogether
+	public void collisionDistanceCompare(Geom collide, double minSpread) { 
+		int listLevel = 0;
+		int hashLevel = 0;
+		int listMem = 0;
+		int hashMem = 0;
+		boolean added = false;
+		for (List<HashSet<Geom>> listOfGeoms: this.CollisionGlobal) {
+			System.out.println("List Level: " + listLevel);
+			for (HashSet<Geom> listOfHashSets: listOfGeoms) {
+				System.out.println("Hash Level: " + hashLevel);	
+				for (Geom collideWith: listOfHashSets) {
+					if (collideWith.getOffset().dist(collide.getOffset()) <= minSpread) {
+						added = true;
+						listMem = listLevel;
+						hashMem = hashLevel;
+					}
+				}// Individual Geoms
+				hashLevel++;
+			}// List of Hashes
+			hashLevel = 0;
+			listLevel++;
+		}// Data Walkthrough
 		
+		if (added) {
+			this.getCollisionGlobal().get(listMem).get(hashMem).add(collide);
+		}else {
+			HashSet<Geom> addTemp = new HashSet<Geom>();
+			addTemp.add(collide);
+			this.getCollisionGlobal().get(0).add(addTemp);
+		}
+	}
+	
+	public void walkthorughString() {
+		int listLevel = 0;// Debug only
+		int hashLevel = 0;// Debug only
+			for (List<HashSet<Geom>> listOfGeoms: this.CollisionGlobal) {
+				for (HashSet<Geom> listOfHashSets: listOfGeoms) {
+					for (Geom collideWith: listOfHashSets)
+						System.out.println("Geom " + collideWith.getOffset() + " at HashSet Level " + hashLevel + " at a GeomType Level of " + listLevel);
+						
+					hashLevel++;
+				}// Individual Hashes
+				hashLevel = 0;
+				listLevel++;
+			}// List of Geoms Types
+				
+		//return new Geom Box;
 	}
 	
 	

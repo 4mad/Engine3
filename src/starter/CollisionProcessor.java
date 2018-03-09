@@ -91,9 +91,7 @@ public class CollisionProcessor {
 		int hashMem = 0;
 		boolean added = false;
 		for (List<HashSet<Geom>> listOfGeoms: this.CollisionGlobal) {
-			System.out.println("List Level: " + listLevel);
 			for (HashSet<Geom> listOfHashSets: listOfGeoms) {
-				System.out.println("Hash Level: " + hashLevel);	
 				for (Geom collideWith: listOfHashSets) {
 					if (collideWith.getOffset().dist(collide.getOffset()) <= minSpread) {
 						added = true;

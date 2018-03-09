@@ -11,7 +11,6 @@ import org.lwjgl.system.*;
 import java.nio.*;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -25,7 +24,7 @@ import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.MemoryUtil.*;
 //A test bed for identifying geometries in collision data and sorting them into their respective groups
 public class SortingTester {
-	final Boolean debug = true;
+	final Boolean debug = false;
 	
 	// Window & Buffer dimensions
 	static final int localDimX = 650;
@@ -38,8 +37,8 @@ public class SortingTester {
 	public List<List<Geom>> wG = realWorldBuilt.getWorldGeometries();
 	public List<List<Geom>> cG = computerWorldBuilt.getWorldGeometries();
 	
-	public CollisionProcessor CollisionCollector = new CollisionProcessor(debug);
-	public List<List<HashSet<Geom>>> CC = CollisionCollector.getCollisionGlobal();
+	public CollisionProcessor colC = new CollisionProcessor();
+	public List<List<HashSet<Geom>>> CC = colC.getCollisionGlobal();
 	
 	// GuesserThread creation
 	public GuesserThreadDebug guesserThreadDebug;
@@ -227,23 +226,16 @@ public class SortingTester {
 		glPointSize(1);//regular point size
 		for (int i = 0; i < 4; i++) {// Renders Points, Lines, Circles, and Squares
 			switch(i) {
-				case 0: Geom throwAwayPointRenderer = new Geom();
+				case 0: Geom throwAwayPoint = new Geom();
 						glPointSize(3);// Change it so its a blind render between a line/point
-						for (int j = 0;j < 4; j++) {
-							Iterator<Geom> iterator0 = CC.get(1).get(j).iterator();// Line Detection collision
-							while (iterator0.hasNext()) {// Renders all the collision points on the "computer vision" screen
-								throwAwayPointRenderer.setOffset(iterator0.next().getOffset().add(new Vector2d(localDimX, 0)));
-								throwAwayPointRenderer.renderPoint();
-							}
-						}
-						
-						glColor3d(1,1,1);// white
-						glPointSize(2);
-						Iterator<Geom> iterator2 = CC.get(2).get(0).iterator();// Circle detection collision
-						while (iterator2.hasNext()) {//Renders all the collision points on the "computer vision" screen
-							throwAwayPointRenderer.setOffset(iterator2.next().getOffset().add(new Vector2d(localDimX, 0)));
-							throwAwayPointRenderer.renderPoint();
-						}
+						for (List<HashSet<Geom>> listOfLists: CC) {
+							for (HashSet<Geom> listOfHashSets: listOfLists) {
+								for (Geom collideWith: listOfHashSets) {
+									throwAwayPoint.setOffset(collideWith.getOffset().add(new Vector2d(localDimX, 0)));
+									throwAwayPoint.renderPoint();
+								}// Individual Geoms getOffset().add(new Vector2d(localDimX, 0)));
+							}// List of Hashes
+						}// List of Geom Types
 						break;
 				case 1: for (int j = 0; j < 4; j++) {
 							glColor3d(0.8,0.5,0.7);//gold
@@ -296,20 +288,18 @@ public class SortingTester {
 								if (minToLine/wG.get(1).get(j).minDistPointToLine(lineColide.getOffset()) <= 0) {// Detection when vertex is on the opposite side of the line that the center is on, allows for collision from both sides of line
 									if (debug) {
 										System.out.println("Right Line Poly Collision Geometry : " + lineColide);// Debug
-										lineColide = wG.get(1).get(j).collisionRegPolyVsLineRefineDebug(wG.get(3).get(0), 10);// Refined collision at 1/10 speed (10x Accuracy)
-										System.out.println("Refined circle square Collision point : " + lineColide);
+										lineColide = wG.get(1).get(j).collisionRegPolyVsLineRefine(wG.get(3).get(0), 10);// Refined collision at 1/10 speed (10x Accuracy)
+										System.out.println("Refined square line Collision point : " + lineColide);
+										colC.collisionDistanceCompareDebug(lineColide, wG.get(3).get(0).getGeometry().getLDA());
+										colC.walkthorughString();
 									} else {
 										lineColide = wG.get(1).get(j).collisionRegPolyVsLineRefine(wG.get(3).get(0), 10);// Refined collision at 1/10 speed (10x Accuracy)
+										colC.collisionDistanceCompare(lineColide, wG.get(3).get(0).getGeometry().getLDA());
 									}
 									// Path-Finding below, needs a lot of work
 									wG.get(3).get(0).setVelocity(wG.get(3).get(0).getVelocity().scalarMulti(-1)); // Basic visual response to collision
 									wG.get(3).get(0).setOffset(wG.get(3).get(0).getOffset().add(wG.get(3).get(0).getVelocity()));
 									wG.get(3).get(0).setDeltaAngle(wG.get(3).get(0).getDeltaAngle()*-1);
-
-									if (debug)
-										System.out.println("Right Line Poly Collision Geometry after Refinement : " + lineColide);//Debug
-										
-									CC.get(1).get(j).add(lineColide);
 								}
 							}
 							
@@ -329,17 +319,19 @@ public class SortingTester {
 							if (circleColide.getOffset().dist(wG.get(2).get(0).getOffset()) <= wG.get(2).get(0).getGeometry().getLDA()/2) {//Detection when distance to vertex is shorter than radius
 								if (debug){
 									System.out.println("Circle Square Collision Point: " + circleColide);//Debug
-									circleColide = wG.get(2).get(0).collisionSquareVsCircleRefineDebug(wG.get(3).get(0), 10);
-									System.out.println("Refined circle square Collision point : " + circleColide);
-								}// If Debug
-								else 
 									circleColide = wG.get(2).get(0).collisionSquareVsCircleRefine(wG.get(3).get(0), 10);
-							
+									System.out.println("Refined circle square Collision point : " + circleColide);
+									colC.collisionDistanceCompareDebug(circleColide, wG.get(3).get(0).getGeometry().getLDA());
+									colC.walkthorughString();
+								}// If Debug
+								else {
+									circleColide = wG.get(2).get(0).collisionSquareVsCircleRefine(wG.get(3).get(0), 10);
+									colC.collisionDistanceCompare(circleColide, wG.get(3).get(0).getGeometry().getLDA());
+								}
+								
 								wG.get(3).get(0).setVelocity(wG.get(3).get(0).getVelocity().scalarMulti(-1));// Basic visual response to collision
 								wG.get(3).get(0).setOffset(wG.get(3).get(0).getOffset().add(wG.get(3).get(0).getVelocity()));
 								wG.get(3).get(0).setDeltaAngle(wG.get(3).get(0).getDeltaAngle()*-1);
-								
-								CC.get(2).get(0).add(circleColide);// Update circleCollide data set
 							}// If Collision Happened
 						}// If in buffer zone 
 						
@@ -358,6 +350,11 @@ public class SortingTester {
 			wG.get(3).get(0).setOffset(wG.get(3).get(0).getOffset().add(new Vector2d(-1,0).scalarMulti(wG.get(3).get(0).getVelocity().magnitude()*2)));
 		if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)// Move square RIGHT by 2x velocity magnitude
 			wG.get(3).get(0).setOffset(wG.get(3).get(0).getOffset().add(new Vector2d(1,0).scalarMulti(wG.get(3).get(0).getVelocity().magnitude()*2)));
+		if (glfwGetKey(window, GLFW_KEY_COMMA) == GLFW_PRESS)// Performs the sorting
+			if (debug)
+				colC.baseSortDebug();
+			else
+				colC.baseSort();
 		if ((glfwGetKey(window, GLFW_KEY_SLASH) == GLFW_PRESS && (CC.get(2).get(0).size() >= 4))){//Updates kasa circle guesser
 			if (slashKey == 0){// This part is only activated when the button is first pressed.
 				slashKey = 1;
